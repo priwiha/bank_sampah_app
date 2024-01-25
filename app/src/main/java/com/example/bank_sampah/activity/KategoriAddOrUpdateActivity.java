@@ -1,8 +1,10 @@
-package com.example.bank_sampah;
+package com.example.bank_sampah.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+
+import com.example.bank_sampah.R;
 
 public class KategoriAddOrUpdateActivity extends AppCompatActivity {
 

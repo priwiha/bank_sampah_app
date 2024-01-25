@@ -1,11 +1,12 @@
-package com.example.bank_sampah;
-
-import androidx.appcompat.app.AppCompatActivity;
+package com.example.bank_sampah.activity;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+
+import com.example.bank_sampah.MainActivity;
+import com.example.bank_sampah.R;
 
 public class SplashActivity extends Activity {
     Handler handler;
@@ -18,7 +19,7 @@ public class SplashActivity extends Activity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                Intent intent=new Intent(SplashActivity.this,MainActivity.class);
+                Intent intent=new Intent(SplashActivity.this, MainActivity.class);
                 startActivity(intent);
                 finish();
             }

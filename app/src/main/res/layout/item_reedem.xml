@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/txtTgl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:gravity="left"
+            android:textColor="@color/softmaroon"
+            android:textSize="20dp"
+            android:textStyle="bold"
+            android:text="dd/mm/yyyy"/>
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/txtRp"
+            android:layout_weight="1"
+            android:textSize="20dp"
+            android:layout_gravity="center"
+            android:gravity="right"
+            android:text="Total Perolehan Rp"/>
+    </LinearLayout>
+
+
+
+</LinearLayout>

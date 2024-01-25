@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <LinearLayout
@@ -10,15 +11,9 @@
         android:orientation="horizontal">
 
         <!--ICON PHOTO-->
-        <LinearLayout
+        <!--<LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
-
-            <androidx.cardview.widget.CardView
-                android:layout_width="55dp"
-                android:layout_height="55dp"
-                app:cardCornerRadius="250dp"
-                app:cardBackgroundColor="@color/white">
 
                 <androidx.cardview.widget.CardView
                     android:layout_width="50dp"
@@ -35,9 +30,8 @@
 
                 </androidx.cardview.widget.CardView>
 
-            </androidx.cardview.widget.CardView>
-        <!--ICON PHOTO-->
-        </LinearLayout>
+        &lt;!&ndash;ICON PHOTO&ndash;&gt;
+        </LinearLayout>-->
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -54,6 +48,8 @@
             <TextView
                 android:id="@+id/txtNama"
                 android:text="Nama Kategori"
+                android:textSize="20dp"
+                android:textStyle="bold"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
@@ -75,11 +71,15 @@
                 android:layout_height="wrap_content">
 
                 <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right"
-                android:gravity="right"
-                android:text="Tanggal dd/mm/yyyy"/>
+                    android:id="@+id/txttgl"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:gravity="right"
+                    android:textColor="@color/lightgreen"
+                    android:textSize="15dp"
+                    android:textStyle="bold"
+                    android:text="Tanggal dd/mm/yyyy"/>
             </LinearLayout>
 
 

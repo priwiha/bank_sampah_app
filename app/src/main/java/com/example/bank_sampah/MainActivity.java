@@ -10,6 +10,8 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.example.bank_sampah.activity.DashboardMemberActivity;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -72,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent i = new Intent(MainActivity.this, DashboardMemberActivity.class);
                 startActivity(i);
+                finish();
                 //Toasty.success(MainActivity.this, "Success!", Toast.LENGTH_SHORT, true).show();
                 Toast.makeText(MainActivity.this, "Success!", Toast.LENGTH_SHORT).show();
             }
@@ -88,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         this.doubleBackToExitPressedOnce = true;
-        Toast.makeText(MainActivity.this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
 
         new Handler().postDelayed(new Runnable() {
 
