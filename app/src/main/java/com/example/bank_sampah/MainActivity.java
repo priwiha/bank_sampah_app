@@ -11,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.example.bank_sampah.activity.DashboardMemberActivity;
+import com.example.bank_sampah.activity.HomeAdminActivity;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -72,10 +73,11 @@ public class MainActivity extends AppCompatActivity {
         lg_login_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(MainActivity.this, DashboardMemberActivity.class);
+                //Intent i = new Intent(MainActivity.this, DashboardMemberActivity.class);
+                Intent i = new Intent(MainActivity.this, HomeAdminActivity.class);
                 startActivity(i);
                 finish();
-                //Toasty.success(MainActivity.this, "Success!", Toast.LENGTH_SHORT, true).show();
+
                 Toast.makeText(MainActivity.this, "Success!", Toast.LENGTH_SHORT).show();
             }
         });
