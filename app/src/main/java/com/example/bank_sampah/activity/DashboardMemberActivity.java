@@ -20,6 +20,7 @@ import com.example.bank_sampah.MainActivity;
 import com.example.bank_sampah.R;
 import com.example.bank_sampah.adapter.TrxSampahAdapter;
 import com.example.bank_sampah.model.TrxSampahModel;
+import com.example.bank_sampah.utility.ViewDialog;
 
 import org.json.JSONObject;
 
@@ -89,6 +90,14 @@ public class DashboardMemberActivity extends AppCompatActivity {
         // on below line we are initializing our variables.
         et_tgl_fill = (EditText) findViewById(R.id.editTextDate);
         //dateEdt = findViewById(R.id.idEdtDate);
+
+        btn_reedem_act.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ViewDialog alert = new ViewDialog();
+                alert.showDialog(DashboardMemberActivity.this);
+            }
+        });
 
         String date = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(new Date());
         et_tgl_fill.setText(date);
