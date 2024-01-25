@@ -15,36 +15,36 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
-                <ImageView
+                <!--<ImageView
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:layout_weight="1"
                     android:padding="10dp"
                     android:src="@drawable/dashboardadmin"/>
-
+-->
                 <LinearLayout
                     android:layout_width="1dp"
                     android:layout_height="50dp"
                     android:background="@color/black"/>
 
-                <ImageView
+                <!--<ImageView
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:layout_weight="1"
                     android:padding="10dp"
                     android:src="@drawable/moneybag"/>
-
+-->
                 <LinearLayout
                     android:layout_width="1dp"
                     android:layout_height="50dp"
                     android:background="@color/black"/>
 
-                <ImageView
+                <!--<ImageView
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:layout_weight="1"
                     android:padding="10dp"
-                    android:src="@drawable/placeholder"/>
+                    android:src="@drawable/placeholder"/>-->
         </LinearLayout>
 
         <LinearLayout

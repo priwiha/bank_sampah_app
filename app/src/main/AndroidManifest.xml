@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -12,6 +16,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Bank_sampah"
         tools:targetApi="31">
+        <activity
+            android:name=".activity.QRCodeScannerActivity"
+            tools:replace="android:screenOrientation"
+            android:stateNotNeeded="true"
+            android:exported="false"
+            android:screenOrientation="sensorPortrait"
+            android:windowSoftInputMode="stateAlwaysHidden" />
         <activity
             android:name=".activity.HistoryReedemActivity"
             android:exported="false" />

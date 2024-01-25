@@ -10,15 +10,28 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.bank_sampah.MainActivity;
 import com.example.bank_sampah.R;
 
 public class HomeAdminActivity extends AppCompatActivity {
 
 
+    private TextView btn_scan;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_admin);
+
+        btn_scan = (TextView) findViewById(R.id.btnscan);
+
+
+        btn_scan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(HomeAdminActivity.this, QRCodeScannerActivity.class);
+                startActivity(i);
+            }
+        });
 
 
     }
