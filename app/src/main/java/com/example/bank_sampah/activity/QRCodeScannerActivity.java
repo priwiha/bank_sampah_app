@@ -34,11 +34,19 @@ public class QRCodeScannerActivity extends AppCompatActivity {
     }
     private void initQRCodeScanner() {
         // Initialize QR code scanner here
-        IntentIntegrator integrator = new IntentIntegrator(this);
-        integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE);
+        /*IntentIntegrator integrator = new IntentIntegrator(this);
+        integrator.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES);
         integrator.setOrientationLocked(true);
         integrator.setPrompt("Scan a QR code");
         integrator.setBeepEnabled(true);
+        integrator.initiateScan();*/
+
+        IntentIntegrator integrator = new IntentIntegrator(this);
+        integrator.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES);
+        integrator.setPrompt("Scan");
+        integrator.setCameraId(0);
+        integrator.setBeepEnabled(false);
+        integrator.setBarcodeImageEnabled(false);
         integrator.initiateScan();
 
     }
@@ -65,8 +73,13 @@ public class QRCodeScannerActivity extends AppCompatActivity {
         if (result != null) {
             if (result.getContents() == null) {
                 Toast.makeText(this, "Scan cancelled", Toast.LENGTH_LONG).show();
+                finish();
             } else {
+
                 Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
+                Intent i = new Intent(QRCodeScannerActivity.this, TransactionMenuActivity.class);
+                i.putExtra("idmember", result.getContents());
+                startActivity(i);
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
