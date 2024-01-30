@@ -12,43 +12,42 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.bank_sampah.R;
-import com.example.bank_sampah.adapter.MasterDataAdapter;
-import com.example.bank_sampah.model.MasterDataModel;
+import com.example.bank_sampah.adapter.PriceAdapter;
+import com.example.bank_sampah.model.MasterPriceModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MasterKategoriActivity extends AppCompatActivity {
+public class MasterPriceActivity extends AppCompatActivity {
 
     private RecyclerView rcv_master;
-    private List<MasterDataModel> list;
-    private MasterDataAdapter adapter;
+    private List<MasterPriceModel> list;
+    private PriceAdapter adapter;
 
     private TextView btn_add;
     private TextView btn_back;
 
 
     boolean doubleBackToExitPressedOnce = false;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_master_kategori);
+        setContentView(R.layout.activity_master_price);
 
         rcv_master = (RecyclerView) findViewById(R.id.rcv_datamaster);
         btn_add = (TextView) findViewById(R.id.btnAddCat);
         btn_back = (TextView) findViewById(R.id.btnBack);
 
 
-        list = new ArrayList<MasterDataModel>();
+        list = new ArrayList<MasterPriceModel>();
         for (int x = 0; x < 10; x++) {
 
             String id = "No "+x;
             String nama = "Kategori "+x;
             String satuan = "Satuan "+x;
-            list.add(new MasterDataModel(id,nama,satuan));
+            list.add(new MasterPriceModel(nama,String.valueOf(x)+",00",satuan,"Y","date","id "+x));
         }
-        adapter = new MasterDataAdapter(list,this);//array dimasukkan ke adapter
+        adapter = new PriceAdapter(list,this);//array dimasukkan ke adapter
         rcv_master.setAdapter(adapter);
         rcv_master.setLayoutManager(new LinearLayoutManager(this));
 
@@ -56,11 +55,11 @@ public class MasterKategoriActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //for (int x = 0; x < 5; x++) {
-                    //Toast.makeText(MasterKategoriActivity.this,list.get(x).getName().toString(),Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MasterKategoriActivity.this,list.get(x).getName().toString(),Toast.LENGTH_SHORT).show();
                 //}
-                Toast.makeText(MasterKategoriActivity.this,"Add New Category",Toast.LENGTH_SHORT).show();
+                Toast.makeText(MasterPriceActivity.this,"Add New Category",Toast.LENGTH_SHORT).show();
 
-                Intent i = new Intent(MasterKategoriActivity.this, CreateOrUpdateCategoryActivity.class);
+                Intent i = new Intent(MasterPriceActivity.this, CreateOrUpdatePricelistActivity.class);
                 i.putExtra("add_or_update", "add");
                 startActivity(i);
                 finish();
@@ -70,21 +69,31 @@ public class MasterKategoriActivity extends AppCompatActivity {
         btn_back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(MasterKategoriActivity.this, HomeAdminActivity.class);
+                Intent i = new Intent(MasterPriceActivity.this, HomeAdminActivity.class);
                 startActivity(i);
                 finish();
             }
         });
 
 
-        adapter.setOnItemClickListener(new MasterDataAdapter.OnItemClickListener() {
+        adapter.setOnItemClickListener(new PriceAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
-                Toast.makeText(MasterKategoriActivity.this,list.get(position).getName().toString(),Toast.LENGTH_SHORT).show();
-                Intent i = new Intent(MasterKategoriActivity.this, CreateOrUpdateCategoryActivity.class);
+                Toast.makeText(MasterPriceActivity.this,list.get(position).getKategori().toString(),Toast.LENGTH_SHORT).show();
+                String status ="";
+                if (list.get(position).getAktif().toString().equals("Y")){
+                    status="Aktif";
+                }
+                else {
+                    status="Non-Aktif";
+                }
+                Intent i = new Intent(MasterPriceActivity.this, CreateOrUpdatePricelistActivity.class);
                 i.putExtra("add_or_update", "update");
-                i.putExtra("name", list.get(position).getName().toString());
+                i.putExtra("kategori", list.get(position).getKategori().toString());
+                i.putExtra("price", list.get(position).getPrice().toString());
                 i.putExtra("satuan", list.get(position).getSatuan().toString());
+                i.putExtra("tgl", list.get(position).getTglins().toString());
+                i.putExtra("status", status/*list.get(position).getAktif().toString()*/);
                 i.putExtra("id", list.get(position).getId().toString());
                 startActivity(i);
                 finish();

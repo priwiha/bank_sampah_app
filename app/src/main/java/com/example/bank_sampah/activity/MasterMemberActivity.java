@@ -13,42 +13,41 @@ import android.widget.Toast;
 
 import com.example.bank_sampah.R;
 import com.example.bank_sampah.adapter.MasterDataAdapter;
+import com.example.bank_sampah.adapter.MemberDataAdapter;
 import com.example.bank_sampah.model.MasterDataModel;
+import com.example.bank_sampah.model.MemberDataModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MasterKategoriActivity extends AppCompatActivity {
-
+public class MasterMemberActivity extends AppCompatActivity {
     private RecyclerView rcv_master;
-    private List<MasterDataModel> list;
-    private MasterDataAdapter adapter;
+    private List<MemberDataModel> list;
+    private MemberDataAdapter adapter;
 
     private TextView btn_add;
     private TextView btn_back;
 
-
     boolean doubleBackToExitPressedOnce = false;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_master_kategori);
+        setContentView(R.layout.activity_master_member);
 
         rcv_master = (RecyclerView) findViewById(R.id.rcv_datamaster);
         btn_add = (TextView) findViewById(R.id.btnAddCat);
         btn_back = (TextView) findViewById(R.id.btnBack);
 
 
-        list = new ArrayList<MasterDataModel>();
+        list = new ArrayList<MemberDataModel>();
         for (int x = 0; x < 10; x++) {
 
-            String id = "No "+x;
-            String nama = "Kategori "+x;
-            String satuan = "Satuan "+x;
-            list.add(new MasterDataModel(id,nama,satuan));
+            String id = "No Member"+x;
+            String nama = "Nama Member "+x;
+            //String satuan = "Satuan "+x;
+            list.add(new MemberDataModel(id,"username "+x,nama ,"mail "+x,"phone "+x,"123456","Y"));
         }
-        adapter = new MasterDataAdapter(list,this);//array dimasukkan ke adapter
+        adapter = new MemberDataAdapter(list,this);//array dimasukkan ke adapter
         rcv_master.setAdapter(adapter);
         rcv_master.setLayoutManager(new LinearLayoutManager(this));
 
@@ -56,36 +55,40 @@ public class MasterKategoriActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //for (int x = 0; x < 5; x++) {
-                    //Toast.makeText(MasterKategoriActivity.this,list.get(x).getName().toString(),Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MasterKategoriActivity.this,list.get(x).getName().toString(),Toast.LENGTH_SHORT).show();
                 //}
-                Toast.makeText(MasterKategoriActivity.this,"Add New Category",Toast.LENGTH_SHORT).show();
+                Toast.makeText(MasterMemberActivity.this,"Add New Member",Toast.LENGTH_SHORT).show();
 
-                Intent i = new Intent(MasterKategoriActivity.this, CreateOrUpdateCategoryActivity.class);
+                /*Intent i = new Intent(MasterMemberActivity.this, CreateOrUpdateCategoryActivity.class);
                 i.putExtra("add_or_update", "add");
                 startActivity(i);
-                finish();
+                finish();*/
             }
         });
 
         btn_back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(MasterKategoriActivity.this, HomeAdminActivity.class);
+                Intent i = new Intent(MasterMemberActivity.this, HomeAdminActivity.class);
                 startActivity(i);
                 finish();
             }
         });
 
 
-        adapter.setOnItemClickListener(new MasterDataAdapter.OnItemClickListener() {
+        adapter.setOnItemClickListener(new MemberDataAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
-                Toast.makeText(MasterKategoriActivity.this,list.get(position).getName().toString(),Toast.LENGTH_SHORT).show();
-                Intent i = new Intent(MasterKategoriActivity.this, CreateOrUpdateCategoryActivity.class);
+                Toast.makeText(MasterMemberActivity.this,list.get(position).getName().toString(),Toast.LENGTH_SHORT).show();
+                Intent i = new Intent(MasterMemberActivity.this, ApprovalOrUpdateMemberActivity.class);
                 i.putExtra("add_or_update", "update");
-                i.putExtra("name", list.get(position).getName().toString());
-                i.putExtra("satuan", list.get(position).getSatuan().toString());
                 i.putExtra("id", list.get(position).getId().toString());
+                i.putExtra("username", list.get(position).getUsername().toString());
+                i.putExtra("name", list.get(position).getName().toString());
+                i.putExtra("phone", list.get(position).getPhone().toString());
+                i.putExtra("mail", list.get(position).getMail().toString());
+                i.putExtra("pass", list.get(position).getPass().toString());
+                i.putExtra("status", list.get(position).getStatus().toString());
                 startActivity(i);
                 finish();
             }

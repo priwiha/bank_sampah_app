@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".activity.MasterKategoriActivity">
+    tools:context=".activity.MasterMemberActivity">
+
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -58,7 +59,7 @@
                     android:layout_weight="1"
                     android:layout_gravity="center"
                     android:gravity="center|left"
-                    android:text="Master Data Category"
+                    android:text="Master Data Member"
                     android:layout_margin="5dp"
                     android:textSize="20dp"
                     android:textStyle="bold"
@@ -71,6 +72,7 @@
                     android:background="@drawable/shape"
                     android:layout_marginLeft="5dp"
                     android:layout_gravity="center"
+                    android:visibility="invisible"
                     android:gravity="center">
 
                     <TextView

@@ -56,11 +56,11 @@ public class AdminMenuAdapter  extends RecyclerView.Adapter<AdminMenuAdapter.Vie
 
             Drawable drawable = ContextCompat.getDrawable(context, R.drawable.member);
             holder.image_Menu.setImageDrawable(drawable);
-        } else if (temp.getIdmenu().equals("4")) {
+        } /*else if (temp.getIdmenu().equals("4")) {
 
             Drawable drawable = ContextCompat.getDrawable(context, R.drawable.transactionaldata);
             holder.image_Menu.setImageDrawable(drawable);
-        } else if (temp.getIdmenu().equals("5")) {
+        }*/ else if (temp.getIdmenu().equals("4")) {
 
             Drawable drawable = ContextCompat.getDrawable(context, R.drawable.logout);
             holder.image_Menu.setImageDrawable(drawable);

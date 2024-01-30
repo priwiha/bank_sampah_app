@@ -45,18 +45,23 @@ public class TransactionMenuAdapter  extends RecyclerView.Adapter<TransactionMen
 
         } else if (temp.getIdmenu().equals("2")) {
 
-            Drawable drawable = ContextCompat.getDrawable(context, R.drawable.history);
+            Drawable drawable = ContextCompat.getDrawable(context, R.drawable.transactionaldata);
             holder.image_Menu.setImageDrawable(drawable);
 
         } else if (temp.getIdmenu().equals("3")) {
 
-            Drawable drawable = ContextCompat.getDrawable(context, R.drawable.claim);
+            Drawable drawable = ContextCompat.getDrawable(context, R.drawable.history);
             holder.image_Menu.setImageDrawable(drawable);
+
         } else if (temp.getIdmenu().equals("4")) {
 
-            Drawable drawable = ContextCompat.getDrawable(context, R.drawable.backarrow);
+            Drawable drawable = ContextCompat.getDrawable(context, R.drawable.claim);
             holder.image_Menu.setImageDrawable(drawable);
-        }
+        } /*else if (temp.getIdmenu().equals("5")) {
+
+            Drawable drawable = ContextCompat.getDrawable(context, R.drawable.back);
+            holder.image_Menu.setImageDrawable(drawable);
+        }*/
     }
 
     @Override

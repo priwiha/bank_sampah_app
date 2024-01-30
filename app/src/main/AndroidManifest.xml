@@ -13,6 +13,39 @@
         android:theme="@style/Theme.Bank_sampah"
         tools:targetApi="31">
         <activity
+            android:name=".activity.UpdateHistoryReedemActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.UpdateHistoryTimbangActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.HistoryReedemAdminActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.HistoryTimbangActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.TransaksiReedemActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.TransaksiTimbangActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.ApprovalOrUpdateMemberActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.MasterMemberActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.MasterPriceActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.CreateOrUpdatePricelistActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.CreateOrUpdateCategoryActivity"
+            android:exported="false" />
+        <activity
             android:name=".activity.MasterKategoriActivity"
             android:exported="false" />
         <activity
@@ -53,9 +86,9 @@
             android:name=".MainActivity"
             android:exported="false" />
     </application>
+    <uses-feature android:name="android.hardware.camera" />
 
     <uses-feature android:name="android.hardware.camera.autofocus" />
-    <uses-feature android:name="android.hardware.camera" />
 
     <uses-permission android:name="android.permission.CAMERA" />
 

@@ -138,8 +138,8 @@ public class HomeAdminActivity extends AppCompatActivity {
         list.add(new AdminMenuModel("1","Kategori Sampah",""));
         list.add(new AdminMenuModel("2","Price",""));
         list.add(new AdminMenuModel("3","Member",""));
-        list.add(new AdminMenuModel("4","Reedem",""));
-        list.add(new AdminMenuModel("5","Log Out",""));
+        //list.add(new AdminMenuModel("4","Reedem",""));
+        list.add(new AdminMenuModel("4","Log Out",""));
         adapter = new AdminMenuAdapter(list,this);//array dimasukkan ke adapter
         rcv_menu.setAdapter(adapter);
         rcv_menu.setLayoutManager(new GridLayoutManager(this,3));
@@ -156,18 +156,18 @@ public class HomeAdminActivity extends AppCompatActivity {
                     //i.putExtra("kode_po", list.get(position).getNopo().toString());
                     startActivity(i);
                 } else if (list.get(position).getIdmenu().toString().equals("2")) {
-                    /*Intent i = new Intent(POListActivity.this, PODetailActivity.class);
-                    i.putExtra("kode_po", list.get(position).getNopo().toString());
-                    startActivity(i);*/
+                    Intent i = new Intent(HomeAdminActivity.this, MasterPriceActivity.class);
+                    //i.putExtra("kode_po", list.get(position).getNopo().toString());
+                    startActivity(i);
                 } else if (list.get(position).getIdmenu().toString().equals("3")){
-                    /*Intent i = new Intent(POListActivity.this, PODetailActivity.class);
-                    i.putExtra("kode_po", list.get(position).getNopo().toString());
-                    startActivity(i);*/
-                } else if (list.get(position).getIdmenu().toString().equals("4")){
+                    Intent i = new Intent(HomeAdminActivity.this, MasterMemberActivity.class);
+                    //i.putExtra("kode_po", list.get(position).getNopo().toString());
+                    startActivity(i);
+                //} else if (list.get(position).getIdmenu().toString().equals("4")){
                     /*Intent i = new Intent(HomeAdminActivity.this, MainActivity.class);
                     startActivity(i);
                     finish();*/
-                }else if (list.get(position).getIdmenu().toString().equals("5")){
+                }else if (list.get(position).getIdmenu().toString().equals("4")){
                     Intent i = new Intent(HomeAdminActivity.this, MainActivity.class);
                     startActivity(i);
                     finish();
