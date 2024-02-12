@@ -8,21 +8,16 @@ import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.bank_sampah.MainActivity;
 import com.example.bank_sampah.R;
 import com.example.bank_sampah.adapter.TrxSampahAdapter;
 import com.example.bank_sampah.model.TrxSampahModel;
 import com.example.bank_sampah.utility.ViewDialog;
-
-import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

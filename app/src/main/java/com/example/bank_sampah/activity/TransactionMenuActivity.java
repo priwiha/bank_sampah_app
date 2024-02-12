@@ -12,9 +12,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.bank_sampah.MainActivity;
 import com.example.bank_sampah.R;
-import com.example.bank_sampah.adapter.AdminMenuAdapter;
 import com.example.bank_sampah.adapter.TransactionMenuAdapter;
 import com.example.bank_sampah.model.AdminMenuModel;
 

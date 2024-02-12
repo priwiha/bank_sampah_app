@@ -2,7 +2,6 @@ package com.example.bank_sampah.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
@@ -13,18 +12,13 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.bank_sampah.MainActivity;
 import com.example.bank_sampah.R;
 import com.example.bank_sampah.adapter.AdminMenuAdapter;
-import com.example.bank_sampah.adapter.TrxSampahAdapter;
 import com.example.bank_sampah.model.AdminMenuModel;
-import com.example.bank_sampah.model.TrxSampahModel;
 
 import java.util.ArrayList;
 import java.util.List;
