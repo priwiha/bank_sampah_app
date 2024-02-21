@@ -31,6 +31,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.POST;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -43,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
     //button layout login
     private Button lg_login_btn;
     private Button lg_register_btn;
+    private EditText lg_userid;
+    private EditText lg_pass;
 
 
     //button layout register
@@ -73,6 +77,8 @@ public class MainActivity extends AppCompatActivity {
         //button layout login
         lg_login_btn = (Button) findViewById(R.id.LoginButtonLg);
         lg_register_btn = (Button) findViewById(R.id.RegisterButtonLg);
+        lg_userid = (EditText) findViewById(R.id.editTextUserid);
+        lg_pass = (EditText) findViewById(R.id.editTextPassword);
 
         //button layout login
         rg_register_btn = (Button) findViewById(R.id.RegisterButtonRg);
@@ -122,12 +128,59 @@ public class MainActivity extends AppCompatActivity {
         lg_login_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //Intent i = new Intent(MainActivity.this, DashboardMemberActivity.class);
-                Intent i = new Intent(MainActivity.this, HomeAdminActivity.class);
-                startActivity(i);
-                finish();
 
-                Toast.makeText(MainActivity.this, "Success!", Toast.LENGTH_SHORT).show();
+                   ProgressDialog loading = ProgressDialog.show(mContext, null, "Harap Tunggu...", true, false);
+
+                    //Toast.makeText(mContext, rg_mail.getText().toString(), Toast.LENGTH_SHORT).show();
+
+                    dataService.LoginRequest(lg_userid.getText().toString(),
+                                    lg_pass.getText().toString()).
+                            enqueue(new Callback<ResponseBody>() {
+                                @Override
+                                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                    if (response.isSuccessful()){
+                                        Log.i("debug", "onResponse: Berhasil");
+                                        //Log.i("cek ",String.valueOf(response.body()));
+                                        loading.dismiss();
+                                        try {
+
+                                            // Ambil objek data dari JSON
+                                            JSONObject jsonRESULTS = new JSONObject(response.body().string());
+                                            JSONObject dataObject = jsonRESULTS.getJSONObject("data");
+
+                                            // Buat array JSON baru dan tambahkan objek data ke dalamnya
+                                            JSONArray dataArray = new JSONArray();
+                                            dataArray.put(dataObject);
+
+                                            // Output array JSON
+                                            //System.out.println(dataArray.toString());
+
+                                            Log.e("cek panjang json array",String.valueOf(dataArray.length()));
+                                            if (dataArray.length()>0)
+                                            {
+                                                getDataJsonLogin(dataArray);
+                                            }
+                                            login_layout.setVisibility(View.VISIBLE);
+                                            register_layout.setVisibility(View.GONE);
+
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    } else {
+                                        Log.i("debug", "onResponse: Tidak Berhasil");
+                                        loading.dismiss();
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                    Log.e("debug", "onFailure: ERROR > " + t.getMessage());
+                                    loading.dismiss();
+                                    Toast.makeText(mContext, "Koneksi Internet Bermasalah", Toast.LENGTH_SHORT).show();
+                                }
+                            });
             }
         });
 
@@ -164,11 +217,7 @@ public class MainActivity extends AppCompatActivity {
                                             dataArray.put(dataObject);
 
                                             // Output array JSON
-                                            System.out.println(dataArray.toString());
-
-                                            // Jika Anda perlu mengakses nilai tertentu dari objek "data"
-                                            String userId = dataObject.getString("userid");
-                                            String userName = dataObject.getString("name");
+                                            //System.out.println(dataArray.toString());
 
                                             Log.e("cek panjang json array",String.valueOf(dataArray.length()));
                                             if (dataArray.length()>0)
@@ -198,8 +247,40 @@ public class MainActivity extends AppCompatActivity {
                             });
 
             }
+            else {
+                    Toast.makeText(mContext, "Periksa kembali password", Toast.LENGTH_SHORT).show();
+                }
         }});
 
+    }
+
+    private void getDataJsonLogin(JSONArray dataArray) {
+        String id ="";
+        String userid = "";
+        String role = "";
+        try{
+            for (int x = 0; x < dataArray.length(); x++)
+            {
+                JSONObject child = dataArray.getJSONObject(x);
+
+                id = child.getString("id");
+                userid = child.getString("userid");
+                role = child.getString("role");
+
+                Toast.makeText(MainActivity.this, "Berhasil Login", Toast.LENGTH_SHORT).show();
+            }
+            if (role.equals("1")) {
+                Intent i = new Intent(MainActivity.this, HomeAdminActivity.class);
+                startActivity(i);
+                finish();
+            } else if (role.equals("2")) {
+                Intent i = new Intent(MainActivity.this, DashboardMemberActivity.class);
+                startActivity(i);
+                finish();
+            }
+        }catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void getDataJson(JSONArray jsonRESULTS) {

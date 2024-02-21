@@ -26,6 +26,11 @@ public interface DataService extends Parcelable {
                                        @Field("role") String role/*,
                                        @Field("Status") String status*/);
 
+    @FormUrlEncoded
+    @POST("user/login"/*"/api/register"*/)
+    Call<ResponseBody> LoginRequest(@Field("userid") String userid,
+                                    @Field("password") String pass);
+
 
 
 }
