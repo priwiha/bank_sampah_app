@@ -17,14 +17,14 @@ public interface DataService extends Parcelable {
     // Fungsi ini untuk memanggil API http://192.168.88.20/latihan1/login.php
     // penamaan link sesuai dengan localhost masing-masing
     @FormUrlEncoded
-    @POST("/api/register")
+    @POST("user/create"/*"/api/register"*/)
     Call<ResponseBody> registerRequest(@Field("userid") String userid,
                                        @Field("name") String name,
                                        @Field("email") String mail,
                                        @Field("phone") String telpon,
-                                       @Field("pass") String pass,
-                                       @Field("role") String role,
-                                       @Field("Status") String status);
+                                       @Field("password") String pass,
+                                       @Field("role") String role/*,
+                                       @Field("Status") String status*/);
 
 
 

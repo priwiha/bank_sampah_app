@@ -18,6 +18,7 @@ import com.example.bank_sampah.R;
 import com.example.bank_sampah.utility.network.UtilsApi;
 import com.example.bank_sampah.utility.network.service.DataService;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -29,6 +30,7 @@ import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import retrofit2.http.Field;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -78,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
         rg_userid = (EditText) findViewById(R.id.editTextUserid);
         rg_name = (EditText) findViewById(R.id.editTextNama);
         rg_phone = (EditText) findViewById(R.id.editTextPhone);
-        rg_mail = (EditText) findViewById(R.id.editTextEmail);
+        rg_mail = (EditText) findViewById(R.id.editTextMail);
         rg_pass = (EditText) findViewById(R.id.editTextPass);
         rg_konfpass = (EditText) findViewById(R.id.editTextConfPassword);
 
@@ -137,30 +139,45 @@ public class MainActivity extends AppCompatActivity {
 
                     ProgressDialog loading = ProgressDialog.show(mContext, null, "Harap Tunggu...", true, false);
 
+                    //Toast.makeText(mContext, rg_mail.getText().toString(), Toast.LENGTH_SHORT).show();
 
                     dataService.registerRequest(rg_userid.getText().toString(),
                             rg_name.getText().toString(),
-                            rg_phone.getText().toString(),
                             rg_mail.getText().toString(),
-                            rg_konfpass.getText().toString(),"2","Y").
+                            rg_phone.getText().toString(),
+                            rg_konfpass.getText().toString(),"2"/*,"Y"*/).
                             enqueue(new Callback<ResponseBody>() {
                                 @Override
                                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                                     if (response.isSuccessful()){
                                         Log.i("debug", "onResponse: Berhasil");
+                                        //Log.i("cek ",String.valueOf(response.body()));
                                         loading.dismiss();
                                         try {
+
+                                            // Ambil objek data dari JSON
                                             JSONObject jsonRESULTS = new JSONObject(response.body().string());
-                                            Log.e("cek json",String.valueOf(jsonRESULTS));
-                                            if (jsonRESULTS.getString("error").equals("false")){
-                                                Toast.makeText(mContext, "Anda Berhasil Registrasi", Toast.LENGTH_SHORT).show();
-                                                //startActivity(new Intent(mContext, LoginActivity.class));
-                                                login_layout.setVisibility(View.VISIBLE);
-                                                register_layout.setVisibility(View.GONE);
-                                            } else {
-                                                String error_message = jsonRESULTS.getString("error_msg");
-                                                Toast.makeText(mContext, error_message, Toast.LENGTH_SHORT).show();
+                                            JSONObject dataObject = jsonRESULTS.getJSONObject("data");
+
+                                            // Buat array JSON baru dan tambahkan objek data ke dalamnya
+                                            JSONArray dataArray = new JSONArray();
+                                            dataArray.put(dataObject);
+
+                                            // Output array JSON
+                                            System.out.println(dataArray.toString());
+
+                                            // Jika Anda perlu mengakses nilai tertentu dari objek "data"
+                                            String userId = dataObject.getString("userid");
+                                            String userName = dataObject.getString("name");
+
+                                            Log.e("cek panjang json array",String.valueOf(dataArray.length()));
+                                            if (dataArray.length()>0)
+                                            {
+                                                getDataJson(dataArray);
                                             }
+                                            login_layout.setVisibility(View.VISIBLE);
+                                            register_layout.setVisibility(View.GONE);
+
                                         } catch (JSONException e) {
                                             e.printStackTrace();
                                         } catch (IOException e) {
@@ -175,6 +192,7 @@ public class MainActivity extends AppCompatActivity {
                                 @Override
                                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                                     Log.e("debug", "onFailure: ERROR > " + t.getMessage());
+                                    loading.dismiss();
                                     Toast.makeText(mContext, "Koneksi Internet Bermasalah", Toast.LENGTH_SHORT).show();
                                 }
                             });
@@ -182,6 +200,23 @@ public class MainActivity extends AppCompatActivity {
             }
         }});
 
+    }
+
+    private void getDataJson(JSONArray jsonRESULTS) {
+        try{
+            for (int x = 0; x < jsonRESULTS.length(); x++)
+            {
+                JSONObject child = jsonRESULTS.getJSONObject(x);
+
+                String id = child.getString("id");
+                String userid = child.getString("userid");
+
+                Toast.makeText(MainActivity.this, "Member "+userid+" Berhasil terdaftar dengan no "+id, Toast.LENGTH_SHORT).show();
+
+            }
+        }catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void requestRegister() {
