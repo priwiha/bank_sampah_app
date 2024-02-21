@@ -8,6 +8,7 @@ import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -44,6 +45,8 @@ public class DashboardMemberActivity extends AppCompatActivity {
 
     private TextView tv_date;
     private TextView tv_amt;
+    //header
+    private TextView tv_memname;
 
 
     boolean doubleBackToExitPressedOnce = false;
@@ -66,6 +69,27 @@ public class DashboardMemberActivity extends AppCompatActivity {
         rcv_trx = (RecyclerView) findViewById(R.id.rcv_trx);
         tv_date = (TextView) findViewById(R.id.tvdate);
         tv_amt = (TextView) findViewById(R.id.tvamt);
+
+        //header
+        tv_memname = (TextView) findViewById(R.id.memname);
+
+        // Aktivitas penerima
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            // Mendapatkan data dari Bundle
+            String id = bundle.getString("id");
+            String userid = bundle.getString("userid");
+            String name = bundle.getString("name");
+
+            tv_memname.setText(name);
+            // Gunakan data sesuai kebutuhan
+            // Misalnya, tampilkan data dalam logcat
+            Log.d("AktivitasPenerima", "Nama: " + id);
+            Log.d("AktivitasPenerima", "Userid: " + userid);
+        } else {
+            Log.e("AktivitasPenerima", "Bundle kosong");
+        }
+
 
         list = new ArrayList<TrxSampahModel>();
         for (int x = 0; x < 10; x++) {
@@ -158,6 +182,7 @@ public class DashboardMemberActivity extends AppCompatActivity {
         btn_logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                MainActivity.GlobalVariables(null,null);
                 Intent i = new Intent(DashboardMemberActivity.this, MainActivity.class);
                 startActivity(i);
                 finish();

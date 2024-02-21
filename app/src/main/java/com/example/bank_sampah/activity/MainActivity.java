@@ -258,6 +258,7 @@ public class MainActivity extends AppCompatActivity {
         String id ="";
         String userid = "";
         String role = "";
+        String name = "";
         try{
             for (int x = 0; x < dataArray.length(); x++)
             {
@@ -265,16 +266,35 @@ public class MainActivity extends AppCompatActivity {
 
                 id = child.getString("id");
                 userid = child.getString("userid");
+                name = child.getString("name");
                 role = child.getString("role");
 
                 Toast.makeText(MainActivity.this, "Berhasil Login", Toast.LENGTH_SHORT).show();
             }
             if (role.equals("1")) {
+                GlobalVariables(id,userid);
                 Intent i = new Intent(MainActivity.this, HomeAdminActivity.class);
+                // Membuat objek Bundle
+                Bundle bundle = new Bundle();
+                // Menambahkan data ke Bundle
+                bundle.putString("id", id);
+                bundle.putString("userid", userid);
+                bundle.putString("name", name);
+                // Menambahkan Bundle ke Intent
+                i.putExtras(bundle);
                 startActivity(i);
                 finish();
             } else if (role.equals("2")) {
+                GlobalVariables(id,userid);
                 Intent i = new Intent(MainActivity.this, DashboardMemberActivity.class);
+                // Membuat objek Bundle
+                Bundle bundle = new Bundle();
+                // Menambahkan data ke Bundle
+                bundle.putString("id", id);
+                bundle.putString("userid", userid);
+                bundle.putString("name", name);
+                // Menambahkan Bundle ke Intent
+                i.putExtras(bundle);
                 startActivity(i);
                 finish();
             }
@@ -328,4 +348,11 @@ public class MainActivity extends AppCompatActivity {
             }
         }, 2000);
     }
+
+    public static void GlobalVariables (String p_id,String p_user){
+        String id = p_id;
+        String globalString = p_user;
+    }
+
+
 }

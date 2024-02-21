@@ -50,6 +50,22 @@ public class HomeAdminActivity extends AppCompatActivity {
 
         rcv_menu = (RecyclerView) findViewById(R.id.rcv_menu);
 
+        // Aktivitas penerima
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            // Mendapatkan data dari Bundle
+            String id = bundle.getString("id");
+            String userid = bundle.getString("userid");
+            String name = bundle.getString("name");
+
+            // Gunakan data sesuai kebutuhan
+            // Misalnya, tampilkan data dalam logcat
+            Log.d("AktivitasPenerima", "Nama: " + id);
+            Log.d("AktivitasPenerima", "Userid: " + userid);
+        } else {
+            Log.e("AktivitasPenerima", "Bundle kosong");
+        }
+
         input_kode.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @SuppressLint("RestrictedApi")
             @Override
@@ -162,6 +178,7 @@ public class HomeAdminActivity extends AppCompatActivity {
                     startActivity(i);
                     finish();*/
                 }else if (list.get(position).getIdmenu().toString().equals("4")){
+                    MainActivity.GlobalVariables(null,null);
                     Intent i = new Intent(HomeAdminActivity.this, MainActivity.class);
                     startActivity(i);
                     finish();
