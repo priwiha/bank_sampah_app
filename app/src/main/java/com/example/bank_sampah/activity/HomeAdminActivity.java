@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.example.bank_sampah.R;
 import com.example.bank_sampah.adapter.AdminMenuAdapter;
 import com.example.bank_sampah.model.AdminMenuModel;
+import com.example.bank_sampah.utility.GlobalData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,12 @@ public class HomeAdminActivity extends AppCompatActivity {
 
     boolean doubleBackToExitPressedOnce = false;
 
+    //global var
+    GlobalData globalData = GlobalData.getInstance();
+    ArrayList<String> dataList = globalData.getDataList();
+    String userid = dataList.get(0);
+    //global var
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +56,8 @@ public class HomeAdminActivity extends AppCompatActivity {
 
 
         rcv_menu = (RecyclerView) findViewById(R.id.rcv_menu);
+
+        //Toast.makeText(HomeAdminActivity.this,"cek get global var "+userid,Toast.LENGTH_SHORT).show();
 
         // Aktivitas penerima
         Bundle bundle = getIntent().getExtras();
@@ -145,7 +154,7 @@ public class HomeAdminActivity extends AppCompatActivity {
 
             list.add(new AdminMenuModel(id,nama,image));
         }*/
-        list.add(new AdminMenuModel("1","Kategori Sampah",""));
+        list.add(new AdminMenuModel("1","Kategori",""));
         list.add(new AdminMenuModel("2","Price",""));
         list.add(new AdminMenuModel("3","Member",""));
         //list.add(new AdminMenuModel("4","Reedem",""));
@@ -163,7 +172,7 @@ public class HomeAdminActivity extends AppCompatActivity {
                 if (list.get(position).getIdmenu().toString().equals("1"))
                 {
                     Intent i = new Intent(HomeAdminActivity.this, MasterKategoriActivity.class);
-                    //i.putExtra("kode_po", list.get(position).getNopo().toString());
+                    //i.putExtra("userid", userid);
                     startActivity(i);
                 } else if (list.get(position).getIdmenu().toString().equals("2")) {
                     Intent i = new Intent(HomeAdminActivity.this, MasterPriceActivity.class);
@@ -178,7 +187,7 @@ public class HomeAdminActivity extends AppCompatActivity {
                     startActivity(i);
                     finish();*/
                 }else if (list.get(position).getIdmenu().toString().equals("4")){
-                    MainActivity.GlobalVariables(null,null);
+                    globalData.removeData(userid);
                     Intent i = new Intent(HomeAdminActivity.this, MainActivity.class);
                     startActivity(i);
                     finish();

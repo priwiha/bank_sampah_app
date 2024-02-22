@@ -5,8 +5,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -15,6 +17,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.example.bank_sampah.R;
+import com.example.bank_sampah.utility.GlobalData;
 import com.example.bank_sampah.utility.network.UtilsApi;
 import com.example.bank_sampah.utility.network.service.DataService;
 
@@ -23,6 +26,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
@@ -36,7 +40,6 @@ import retrofit2.http.POST;
 
 
 public class MainActivity extends AppCompatActivity {
-
 
     //layout
     private LinearLayout login_layout;
@@ -59,10 +62,14 @@ public class MainActivity extends AppCompatActivity {
     private EditText rg_pass;
     private EditText rg_konfpass;
 
-
+    /////retrofit2
     private DataService dataService;
     private static final String TAG = MainActivity.class.getSimpleName();
+    /////retrofit2
     boolean doubleBackToExitPressedOnce = false;
+
+    //global var
+    GlobalData globalData = GlobalData.getInstance();
 
 
     @Override
@@ -83,13 +90,29 @@ public class MainActivity extends AppCompatActivity {
         //button layout login
         rg_register_btn = (Button) findViewById(R.id.RegisterButtonRg);
         rg_back_btn = (Button) findViewById(R.id.BackButtonRg);
-        rg_userid = (EditText) findViewById(R.id.editTextUserid);
+        rg_userid = (EditText) findViewById(R.id.editTextUseridrg);
         rg_name = (EditText) findViewById(R.id.editTextNama);
         rg_phone = (EditText) findViewById(R.id.editTextPhone);
         rg_mail = (EditText) findViewById(R.id.editTextMail);
         rg_pass = (EditText) findViewById(R.id.editTextPass);
         rg_konfpass = (EditText) findViewById(R.id.editTextConfPassword);
 
+        ///global var
+        /*
+        // Menambah data
+        globalData.addData("Data Baru");
+
+        // Mendapatkan data
+        ArrayList<String> dataList = globalData.getDataList();
+
+        // Menghapus data
+        globalData.removeData("Data Lama");
+
+        // Memperbarui data
+        globalData.updateData(0, "Data Terupdate");*/
+        //global var
+
+        /////retrofit2
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
@@ -98,9 +121,11 @@ public class MainActivity extends AppCompatActivity {
 
         Context mContext = MainActivity.this;
         dataService = UtilsApi.getAPIService();
-        // methode ini berfungsi untuk mendeklarasikan widget yang ada
-        // di layout activity_daftar
+        /////retrofit2
+
+        // methode ini berfungsi untuk mendeklarasikan widget yang ada di layout
         initComponents();
+
 
         //11.2.2024
         //Retrofit retrofit = new Retrofit.Builder().baseUrl(Endpoint.API_URL)
@@ -129,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                   ProgressDialog loading = ProgressDialog.show(mContext, null, "Harap Tunggu...", true, false);
+                    ProgressDialog loading = ProgressDialog.show(mContext, null, "Harap Tunggu...", true, false);
 
                     //Toast.makeText(mContext, rg_mail.getText().toString(), Toast.LENGTH_SHORT).show();
 
@@ -271,8 +296,13 @@ public class MainActivity extends AppCompatActivity {
 
                 Toast.makeText(MainActivity.this, "Berhasil Login", Toast.LENGTH_SHORT).show();
             }
+
+            /////////////GlobalVariables
+            globalData.addData(userid);
+            /////////GlobalVariables
+
             if (role.equals("1")) {
-                GlobalVariables(id,userid);
+
                 Intent i = new Intent(MainActivity.this, HomeAdminActivity.class);
                 // Membuat objek Bundle
                 Bundle bundle = new Bundle();
@@ -285,7 +315,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(i);
                 finish();
             } else if (role.equals("2")) {
-                GlobalVariables(id,userid);
+                //GlobalVariables(id,userid);
                 Intent i = new Intent(MainActivity.this, DashboardMemberActivity.class);
                 // Membuat objek Bundle
                 Bundle bundle = new Bundle();
@@ -326,7 +356,6 @@ public class MainActivity extends AppCompatActivity {
     }
     private void initComponents() {
 
-
     }
 
 
@@ -349,10 +378,7 @@ public class MainActivity extends AppCompatActivity {
         }, 2000);
     }
 
-    public static void GlobalVariables (String p_id,String p_user){
-        String id = p_id;
-        String globalString = p_user;
-    }
+
 
 
 }

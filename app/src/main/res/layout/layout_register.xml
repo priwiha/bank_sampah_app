@@ -32,7 +32,7 @@
                 style="@style/parent"
                 android:layout_marginTop="@dimen/loginViewsMargin">
                 <EditText
-                    android:id="@+id/editTextUserid"
+                    android:id="@+id/editTextUseridrg"
                     style="@style/modifiedEditText"
                     android:inputType="textPersonName"
                     android:maxLines="1"

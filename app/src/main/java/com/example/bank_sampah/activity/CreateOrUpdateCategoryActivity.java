@@ -1,17 +1,40 @@
 package com.example.bank_sampah.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
+import okhttp3.OkHttpClient;
+import okhttp3.ResponseBody;
+import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.bank_sampah.R;
+import com.example.bank_sampah.utility.GlobalData;
+import com.example.bank_sampah.utility.network.UtilsApi;
+import com.example.bank_sampah.utility.network.service.DataService;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CreateOrUpdateCategoryActivity extends AppCompatActivity {
 
@@ -22,8 +45,13 @@ public class CreateOrUpdateCategoryActivity extends AppCompatActivity {
     private TextView btn_ch_cat;
 
     private EditText etadd_name_cat;
+    private Spinner spnadd_satuan_cat;
     private EditText etch_name_cat;
-    private EditText etch_satuan_cat;
+    private Spinner spnch_satuan_cat;
+
+    private String sat_id,sat_name;
+    private List<String> list_sat,list_satid;
+    private ArrayAdapter<String> adapter_sat;
 
     private TextView back;
 
@@ -31,7 +59,16 @@ public class CreateOrUpdateCategoryActivity extends AppCompatActivity {
     private String name = "";
     private String id="";
     private String satuan="";
+
+    private DataService dataService;
+    private static final String TAG = MainActivity.class.getSimpleName();
     boolean doubleBackToExitPressedOnce = false;
+
+    //global var
+    GlobalData globalData = GlobalData.getInstance();
+    ArrayList<String> dataList = globalData.getDataList();
+    String userid = dataList.get(0);
+    //global var
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,8 +82,24 @@ public class CreateOrUpdateCategoryActivity extends AppCompatActivity {
         btn_ch_cat = (TextView) findViewById(R.id.save_ch_category);
 
         etadd_name_cat = (EditText) findViewById(R.id.add_name_cat);
+        spnadd_satuan_cat = (Spinner) findViewById(R.id.spn_satuan_cat);
         etch_name_cat = (EditText) findViewById(R.id.ch_name_cat);
-        etch_satuan_cat = (EditText) findViewById(R.id.ch_satuan_cat);
+        spnch_satuan_cat = (Spinner) findViewById(R.id.spn_chsatuan_cat);
+
+        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+        OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+        httpClient.addInterceptor(loggingInterceptor);
+
+        Context mContext = CreateOrUpdateCategoryActivity.this;
+        dataService = UtilsApi.getAPIService();
+        // methode ini berfungsi untuk mendeklarasikan widget yang ada di layout
+        initComponents();
+        getData(mContext,"");
+
+        //Toast.makeText(CreateOrUpdateCategoryActivity.this,"cek get global var "+userid,Toast.LENGTH_SHORT).show();
+
 
         back = (TextView) findViewById(R.id.btnBack);
 
@@ -76,15 +129,311 @@ public class CreateOrUpdateCategoryActivity extends AppCompatActivity {
                 name=intent.getStringExtra("name");
                 id=intent.getStringExtra("id");
                 satuan=intent.getStringExtra("satuan");
+                etch_name_cat.setText(name);
+                getData(mContext,satuan);
             }
             else {
                 lt_add_cat.setVisibility(View.VISIBLE);
                 lt_ch_cat.setVisibility(View.GONE);
             }
-            etch_name_cat.setText(name);
-            etch_satuan_cat.setText(satuan);
+
+            //etch_satuan_cat.setText(satuan);
+        }
+
+
+        btn_add_cat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!sat_id.equalsIgnoreCase("0")) {
+                    //Toast.makeText(CreateOrUpdateCategoryActivity.this,sat_id+"-"+sat_name,Toast.LENGTH_SHORT).show();
+                    saveCategory(etadd_name_cat.getText().toString(),sat_id,userid,mContext);
+                }
+                else {
+                    Toast.makeText(CreateOrUpdateCategoryActivity.this,"Satuan harus dipilih",Toast.LENGTH_SHORT).show();
+
+                }
+            }
+        });
+
+        btn_ch_cat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ChangeCategory(id,etch_name_cat.getText().toString(),sat_id,userid,mContext);
+            }
+        });
+    }
+
+    private void ChangeCategory(String id, String name, String sat_id, String userid, Context mContext) {
+        ProgressDialog loading = ProgressDialog.show(mContext, null, "Harap Tunggu...", true, false);
+
+
+        dataService.ChangeCategory(id,name,sat_id,userid).
+                enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        if (response.isSuccessful()){
+                            Log.i("debug", "onResponse: Berhasil");
+                            //Log.i("cek ",String.valueOf(response.body()));
+                            loading.dismiss();
+                            try {
+
+                                // Ambil objek data dari JSON
+                                JSONObject jsonRESULTS = new JSONObject(response.body().string());
+                                JSONObject dataObject = jsonRESULTS.getJSONObject("data");
+
+                                // Buat array JSON baru dan tambahkan objek data ke dalamnya
+                                JSONArray dataArray = new JSONArray();
+                                dataArray.put(dataObject);
+
+                                // Output array JSON
+                                System.out.println(dataArray.toString());
+
+                                Log.e("panjang json array satuan",String.valueOf(dataArray.length()));
+                                if (dataArray.length()>0)
+                                {
+                                    getResponJson(dataArray);
+                                }
+                                /*login_layout.setVisibility(View.VISIBLE);
+                                register_layout.setVisibility(View.GONE);*/
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            Log.i("debug", "onResponse: Tidak Berhasil");
+                            loading.dismiss();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Log.e("debug", "onFailure: ERROR > " + t.getMessage());
+                        loading.dismiss();
+                        Toast.makeText(mContext, "Koneksi Internet Bermasalah", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+
+    private void saveCategory(String name_category, String sat_id, String userid, Context mContext) {
+        ProgressDialog loading = ProgressDialog.show(mContext, null, "Harap Tunggu...", true, false);
+
+        //Toast.makeText(mContext, rg_mail.getText().toString(), Toast.LENGTH_SHORT).show();
+
+        dataService.CreateCategory(name_category,sat_id,userid).
+                enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        if (response.isSuccessful()){
+                            Log.i("debug", "onResponse: Berhasil");
+                            //Log.i("cek ",String.valueOf(response.body()));
+                            loading.dismiss();
+                            try {
+
+                                // Ambil objek data dari JSON
+                                JSONObject jsonRESULTS = new JSONObject(response.body().string());
+                                JSONObject dataObject = jsonRESULTS.getJSONObject("data");
+
+                                // Buat array JSON baru dan tambahkan objek data ke dalamnya
+                                JSONArray dataArray = new JSONArray();
+                                dataArray.put(dataObject);
+
+                                // Output array JSON
+                                System.out.println(dataArray.toString());
+
+                                Log.e("panjang json array satuan",String.valueOf(dataArray.length()));
+                                if (dataArray.length()>0)
+                                {
+                                    getResponJson(dataArray);
+                                }
+                                /*login_layout.setVisibility(View.VISIBLE);
+                                register_layout.setVisibility(View.GONE);*/
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            Log.i("debug", "onResponse: Tidak Berhasil");
+                            loading.dismiss();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Log.e("debug", "onFailure: ERROR > " + t.getMessage());
+                        loading.dismiss();
+                        Toast.makeText(mContext, "Koneksi Internet Bermasalah", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void getResponJson(JSONArray dataArray) {
+
+        if (dataArray.length() > 0) {
+            String namecategory="";
+            try{
+                for (int x = 0; x < dataArray.length(); x++)
+                {
+                    JSONObject child = dataArray.getJSONObject(x);
+                    namecategory = child.getString("namecategory");
+
+
+
+                }
+                Toast.makeText(CreateOrUpdateCategoryActivity.this, namecategory+" berhasil diproses", Toast.LENGTH_SHORT).show();
+
+                Intent i = new Intent(CreateOrUpdateCategoryActivity.this, MasterKategoriActivity.class);
+                startActivity(i);
+                finish();
+            }catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
+
+    private void getData(Context mContext, String satuan) {
+        ProgressDialog loading = ProgressDialog.show(mContext, null, "Harap Tunggu...", true, false);
+
+        //Toast.makeText(mContext, rg_mail.getText().toString(), Toast.LENGTH_SHORT).show();
+
+        dataService.UomRequestAll().
+                enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        if (response.isSuccessful()){
+                            Log.i("debug", "onResponse: Berhasil");
+                            //Log.i("cek ",String.valueOf(response.body()));
+                            loading.dismiss();
+                            try {
+
+                                // Ambil objek data dari JSON
+                                JSONObject jsonRESULTS = new JSONObject(response.body().string());
+                                //JSONObject dataObject = jsonRESULTS.getJSONObject("data");
+
+                                // Buat array JSON baru dan tambahkan objek data ke dalamnya
+                                JSONArray dataArray = new JSONArray();
+                                dataArray.put(jsonRESULTS);
+
+                                // Output array JSON
+                                System.out.println(dataArray.toString());
+
+                                Log.e("panjang json array satuan",String.valueOf(dataArray.length()));
+                                if (dataArray.length()>0)
+                                {
+                                    getDataJson(dataArray,satuan);
+                                }
+                                /*login_layout.setVisibility(View.VISIBLE);
+                                register_layout.setVisibility(View.GONE);*/
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            Log.i("debug", "onResponse: Tidak Berhasil");
+                            loading.dismiss();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Log.e("debug", "onFailure: ERROR > " + t.getMessage());
+                        loading.dismiss();
+                        Toast.makeText(mContext, "Koneksi Internet Bermasalah", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+
+    private void initComponents() {
+
+
+    }
+
+    private void getDataJson(JSONArray dataArray,String satuan) {
+        list_sat = new ArrayList<>();
+        list_satid = new ArrayList<>();
+        list_sat.add("--Pilih Satuan--");
+        list_satid.add("0");
+
+        if (dataArray.length() > 0) {
+            try {
+                // Ambil objek pertama dari dataArray
+                JSONObject dataObject = dataArray.getJSONObject(0);
+                // Ambil array "data" dari objek tersebut
+                JSONArray dataArrayInside = dataObject.getJSONArray("data");
+                for (int i = 0; i < dataArrayInside.length(); i++) {
+                    JSONObject jo2 = dataArrayInside.getJSONObject(i);
+                    list_sat.add(jo2.getString("uomname"));
+                    list_satid.add(jo2.getString("iduom"));
+
+                    Log.e("cek uomname",jo2.getString("uomname"));
+                    Log.e("cek iduom",jo2.getString("iduom"));
+
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+        adapter_sat= new ArrayAdapter<String>(CreateOrUpdateCategoryActivity.this, android.R.layout.simple_spinner_item, list_sat);
+        adapter_sat.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spnadd_satuan_cat.setAdapter(adapter_sat);
+        spnadd_satuan_cat.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                sat_id = list_satid.get(position);
+                sat_name = list_sat.get(position);
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+
+        adapter_sat= new ArrayAdapter<String>(CreateOrUpdateCategoryActivity.this, android.R.layout.simple_spinner_item, list_sat);
+        adapter_sat.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spnch_satuan_cat.setAdapter(adapter_sat);
+        //set default spinner
+        if (!satuan.equals("")) {
+            for (int i = 0; i < list_sat.size(); i++) {
+                if (satuan.equals(list_satid.get(i))) {
+                    Log.e("cek list uomname", list_sat.get(i) + " = " + satuan);
+                    Log.e("cek list iduom", list_satid.get(i) + " = " + satuan);
+                    spnch_satuan_cat.setSelection(i);
+                }
+            }
+        }
+        spnch_satuan_cat.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String kurir;
+                sat_id = list_satid.get(position);
+                sat_name = list_sat.get(position);
+
+                if (!sat_id.equalsIgnoreCase("0")) {
+                    Toast.makeText(CreateOrUpdateCategoryActivity.this,sat_id+"-"+sat_name,Toast.LENGTH_SHORT).show();
+                }
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+    }
+
 
     public void onBackPressed() {
         if (doubleBackToExitPressedOnce) {

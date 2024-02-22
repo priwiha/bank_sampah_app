@@ -6,8 +6,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.DatePicker;
@@ -18,6 +20,7 @@ import android.widget.Toast;
 import com.example.bank_sampah.R;
 import com.example.bank_sampah.adapter.TrxSampahAdapter;
 import com.example.bank_sampah.model.TrxSampahModel;
+import com.example.bank_sampah.utility.GlobalData;
 import com.example.bank_sampah.utility.ViewDialog;
 
 import java.text.SimpleDateFormat;
@@ -28,10 +31,20 @@ import java.util.List;
 import java.util.Locale;
 
 public class DashboardMemberActivity extends AppCompatActivity {
+    ////////paket global var
+    private String globalVariable;
 
+    public String getGlobalVariable() {
+        return globalVariable;
+    }
+
+    public void setGlobalVariable(String value) {
+        globalVariable = value;
+    }
+    ////////paket global var
 
     ///menu bottom
-    private TextView btn_dashboard;
+    //private TextView btn_dashboard;
     private TextView btn_reedem_hist;
     private TextView btn_profile;
 
@@ -51,6 +64,12 @@ public class DashboardMemberActivity extends AppCompatActivity {
 
     boolean doubleBackToExitPressedOnce = false;
 
+    //global var
+    GlobalData globalData = GlobalData.getInstance();
+    ArrayList<String> dataList = globalData.getDataList();
+    String userid = dataList.get(0);
+    //global var
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,7 +78,7 @@ public class DashboardMemberActivity extends AppCompatActivity {
         btn_logout = (TextView) findViewById(R.id.member_logout);
 
         ///menu bottom
-        btn_dashboard = (TextView) findViewById(R.id.member_dashboard);
+        //btn_dashboard = (TextView) findViewById(R.id.member_dashboard);
         btn_reedem_hist = (TextView) findViewById(R.id.member_reedemhist);
         btn_profile = (TextView) findViewById(R.id.member_profile);
 
@@ -72,6 +91,7 @@ public class DashboardMemberActivity extends AppCompatActivity {
 
         //header
         tv_memname = (TextView) findViewById(R.id.memname);
+
 
         // Aktivitas penerima
         Bundle bundle = getIntent().getExtras();
@@ -182,7 +202,6 @@ public class DashboardMemberActivity extends AppCompatActivity {
         btn_logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                MainActivity.GlobalVariables(null,null);
                 Intent i = new Intent(DashboardMemberActivity.this, MainActivity.class);
                 startActivity(i);
                 finish();
