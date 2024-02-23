@@ -146,7 +146,14 @@ public class CreateOrUpdateCategoryActivity extends AppCompatActivity {
             public void onClick(View view) {
                 if (!sat_id.equalsIgnoreCase("0")) {
                     //Toast.makeText(CreateOrUpdateCategoryActivity.this,sat_id+"-"+sat_name,Toast.LENGTH_SHORT).show();
-                    saveCategory(etadd_name_cat.getText().toString(),sat_id,userid,mContext);
+                    if (!etadd_name_cat.getText().toString().trim().isEmpty())
+                    {
+                        saveCategory(etadd_name_cat.getText().toString(),sat_id,userid,mContext);
+                    }
+                    else {
+                        Toast.makeText(CreateOrUpdateCategoryActivity.this,"Nama Kategori tidak boleh kosong",Toast.LENGTH_SHORT).show();
+
+                    }
                 }
                 else {
                     Toast.makeText(CreateOrUpdateCategoryActivity.this,"Satuan harus dipilih",Toast.LENGTH_SHORT).show();
@@ -158,7 +165,20 @@ public class CreateOrUpdateCategoryActivity extends AppCompatActivity {
         btn_ch_cat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ChangeCategory(id,etch_name_cat.getText().toString(),sat_id,userid,mContext);
+                if (!sat_id.equalsIgnoreCase("0")) {
+                    if (!etadd_name_cat.getText().toString().trim().isEmpty())
+                    {
+                        ChangeCategory(id,etch_name_cat.getText().toString(),sat_id,userid,mContext);
+                    }
+                    else {
+                        Toast.makeText(CreateOrUpdateCategoryActivity.this,"Nama Kategori tidak boleh kosong",Toast.LENGTH_SHORT).show();
+
+                    }
+                }
+                else {
+                    Toast.makeText(CreateOrUpdateCategoryActivity.this,"Satuan harus dipilih",Toast.LENGTH_SHORT).show();
+
+                }
             }
         });
     }

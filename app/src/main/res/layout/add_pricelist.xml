@@ -31,7 +31,27 @@
                         android:id="@+id/textInputName"
                         style="@style/parent">
 
-                        <EditText
+                        <androidx.appcompat.widget.LinearLayoutCompat
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="10dp"
+                            android:background="@drawable/square">
+
+                            <Spinner
+                                android:id="@+id/spn_satuan_cat"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:gravity="center"
+                                android:padding="10dp"
+                                android:layout_margin="5dp"
+                                android:maxLines="1"
+                                android:textSize="20dp"
+                                />
+                        </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+                        <!--<EditText
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
@@ -42,25 +62,7 @@
                             android:inputType="textFilter"
                             android:maxLines="1"
                             android:textSize="20dp"
-                            android:hint="Kategori"/>
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/textInputHarga"
-                        style="@style/parent">
-
-                        <EditText
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_margin="10dp"
-                            android:gravity="center"
-                            android:id="@+id/add_harga_cat"
-                            style="@style/modifiedEditText"
-                            android:inputType="text|number"
-                            android:maxLines="1"
-                            android:textSize="20dp"
-                            android:hint="Harga"/>
+                            android:hint="Kategori"/>-->
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
@@ -68,12 +70,11 @@
                         style="@style/parent">
 
                         <EditText
+                            android:id="@+id/add_satuan_cat"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:layout_margin="10dp"
-                            android:gravity="center"
-                            android:id="@+id/add_satuan_cat"
                             style="@style/modifiedEditText"
                             android:inputType="text"
                             android:maxLines="1"
@@ -81,17 +82,41 @@
                             android:hint="Satuan"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
+                    <androidx.appcompat.widget.LinearLayoutCompat
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginBottom="10dp"
+                        android:background="@color/black"/>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/textInputHarga"
+                        style="@style/parent">
+
+                        <EditText
+                            android:id="@+id/add_harga_cat"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_margin="10dp"
+                            style="@style/modifiedEditText"
+                            android:inputType="text|number"
+                            android:maxLines="1"
+                            android:textSize="20dp"
+                            android:hint="Harga"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+
+
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/textInputTanggal"
                         style="@style/parent">
 
                         <EditText
+                            android:id="@+id/add_tanggal_cat"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:layout_margin="10dp"
-                            android:gravity="center"
-                            android:id="@+id/add_tanggal_cat"
                             style="@style/modifiedEditText"
                             android:inputType="text"
                             android:maxLines="1"
@@ -104,12 +129,11 @@
                         style="@style/parent">
 
                         <EditText
+                            android:id="@+id/add_status_cat"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:layout_margin="10dp"
-                            android:gravity="center"
-                            android:id="@+id/add_status_cat"
                             style="@style/modifiedEditText"
                             android:inputType="text"
                             android:maxLines="1"

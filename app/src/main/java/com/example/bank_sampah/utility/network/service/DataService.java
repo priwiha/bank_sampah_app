@@ -57,4 +57,16 @@ public interface DataService extends Parcelable {
                                       @Field("chuserid") String chuserid);
     ////////////CRUD PROCESS CATEGORY
 
+
+    ////////////CRUD PROCESS PRICE
+    @FormUrlEncoded
+    @POST("price/create")
+    Call<ResponseBody> CreatePrice(@Field("idcategory") String id,
+                                      @Field("price") String name,
+                                      @Field("inuserid") String userid);
+
+    @GET("price/index")
+    Call<ResponseBody> PricelistRequestAll();
+    ////////////CRUD PROCESS PRICE
+
 }
