@@ -300,6 +300,8 @@ public class MainActivity extends AppCompatActivity {
                                             e.printStackTrace();
                                         } catch (IOException e) {
                                             e.printStackTrace();
+                                            Toast.makeText(mContext, "Mohon Cek Kembali Data !", Toast.LENGTH_SHORT).show();
+
                                         }
                                     } else {
 
@@ -320,10 +322,10 @@ public class MainActivity extends AppCompatActivity {
                             });
 
             }
-            else {
-                    Toast.makeText(mContext, "Periksa kembali password", Toast.LENGTH_SHORT).show();
-                    Log.e("cek code",serialCode);
-                }
+                else {
+                        Toast.makeText(mContext, "Mohon Cek Kembali Data !", Toast.LENGTH_SHORT).show();
+                        Log.e("cek code",serialCode);
+                    }
         }});
 
     }

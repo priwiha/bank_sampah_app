@@ -217,7 +217,7 @@ public class MasterKategoriActivity extends AppCompatActivity {
                     nama = jo2.getString("namecategory");
                     satuan = jo2.getString("iduom");
                     satuan_nama = jo2.getString("uomname");
-                    list.add(new MasterDataModel(id,nama+" ("+satuan_nama+")",satuan));
+                    list.add(new MasterDataModel(id,nama,satuan));
                 }
                 adapter = new MasterDataAdapter(list,this);//array dimasukkan ke adapter
                 rcv_master.setAdapter(adapter);

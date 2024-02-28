@@ -55,8 +55,8 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.ViewHolder> 
         else {
             status="Non-Aktif";
         }
-        holder.id.setText(temp.getTglins());
-        holder.nama.setText(temp.getKategori()+" Harga: "+temp.getPrice()+"/"+temp.getSatuan()+" ("+status+")");
+        holder.id.setText(temp.getPrice()+"/"+temp.getSatuan());
+        holder.nama.setText(temp.getTglins()+" ("+status+") "+temp.getKategori());
 
 
     }

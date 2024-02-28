@@ -43,7 +43,14 @@ public class MemberDataAdapter extends RecyclerView.Adapter<MemberDataAdapter.Vi
     public void onBindViewHolder(@NonNull MemberDataAdapter.ViewHolder holder, int position) {
         MemberDataModel temp = data.get(position);
         holder.id.setText(temp.getId());
-        holder.nama.setText(temp.getName()+" ("+temp.getName()+")");
+        String status="";
+        if (temp.getStatus()=="Y") {
+            status = "Aktif";
+        }
+        else {
+            status = "Non-Aktif";
+        }
+        holder.nama.setText(temp.getName()+" ("+status+")");
     }
 
     @Override

@@ -30,9 +30,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class TransaksiReedemActivity extends AppCompatActivity {
     private SwipeRefreshLayout mSwipeRefreshLayout;
@@ -202,7 +204,14 @@ public class TransaksiReedemActivity extends AppCompatActivity {
                 throw new RuntimeException(e);
             }
 
-            tvamt.setText(amt);
+            // Mengonversi string menjadi double
+            double angka = Double.parseDouble(amt);
+            // Membuat format rupiah
+            NumberFormat formatRupiah = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
+            // Menggunakan format rupiah untuk mengonversi angka menjadi string dengan separator
+            String angkaFormatted = formatRupiah.format(angka);
+
+            tvamt.setText(angkaFormatted);
             tvNama.setText(nama+" ("+id_member+")");
             tvtelp.setText("Phone : "+telp);
         }

@@ -16,7 +16,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,12 +36,13 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 
 public class TransaksiTimbangActivity extends AppCompatActivity {
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private TextView btn_back;
 
-    private EditText et_cat;
+    private Spinner et_cat;
     private EditText et_sat;
     private EditText et_bobot;
 
@@ -47,6 +51,10 @@ public class TransaksiTimbangActivity extends AppCompatActivity {
     private TextView tvdate;
 
     private TextView btn_save;
+
+    private String kat_id,kat_name,uomname,iduom;
+    private List<String> list_kat,list_katid,list_uom,list_iduom;
+    private ArrayAdapter<String> adapter_kat;
 
     /////retrofit2
     private DataService dataService;
@@ -67,13 +75,15 @@ public class TransaksiTimbangActivity extends AppCompatActivity {
         setContentView(R.layout.activity_transaksi_timbang);
 
         btn_back = (TextView) findViewById(R.id.btnBack);
-        et_cat = (EditText) findViewById(R.id.select_category);
+        et_cat = (Spinner) findViewById(R.id.spn_satuan_cat);
         et_sat = (EditText) findViewById(R.id.select_satuan);
         et_bobot = (EditText) findViewById(R.id.input_bobot);
         btn_save = (TextView) findViewById(R.id.save_timbang);
         tvNama = (TextView) findViewById(R.id.tvnama);
         tvtelp = (TextView) findViewById(R.id.tvtelp);
         tvdate = (TextView) findViewById(R.id.tvdate);
+
+        et_sat.setEnabled(false);
 
 
         // Inisialisasi SwipeRefreshLayout
@@ -209,6 +219,128 @@ public class TransaksiTimbangActivity extends AppCompatActivity {
             tvNama.setText(nama+" ("+id_member+")");
             tvtelp.setText("Phone : "+telp);
         }
+
+        getKategori(TransaksiTimbangActivity.this);
+    }
+
+    private void getKategori(Context mContext) {
+        mSwipeRefreshLayout.setRefreshing(true);
+
+        ProgressDialog loading = ProgressDialog.show(mContext, null, "Harap Tunggu...", true, false);
+
+        //Toast.makeText(mContext, rg_mail.getText().toString(), Toast.LENGTH_SHORT).show();
+
+        dataService.CategoryRequestAll().
+                enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        if (response.isSuccessful()){
+                            Log.i("debug", "onResponse: Berhasil");
+                            //Log.i("cek ",String.valueOf(response.body()));
+                            loading.dismiss();
+                            mSwipeRefreshLayout.setRefreshing(false);
+                            try {
+
+                                // Ambil objek data dari JSON
+                                JSONObject jsonRESULTS = new JSONObject(response.body().string());
+                                //JSONObject dataObject = jsonRESULTS.getJSONObject("data");
+
+                                // Buat array JSON baru dan tambahkan objek data ke dalamnya
+                                JSONArray dataArray = new JSONArray();
+                                dataArray.put(jsonRESULTS);
+
+                                // Output array JSON
+                                System.out.println(dataArray.toString());
+
+                                Log.e("panjang json array satuan",String.valueOf(dataArray.length()));
+                                if (dataArray.length()>0)
+                                {
+                                    getDataJsonKat(dataArray);
+                                }
+                                /*login_layout.setVisibility(View.VISIBLE);
+                                register_layout.setVisibility(View.GONE);*/
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            Log.i("debug", "onResponse: Tidak Berhasil");
+                            loading.dismiss();
+                            mSwipeRefreshLayout.setRefreshing(false);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Log.e("debug", "onFailure: ERROR > " + t.getMessage());
+                        loading.dismiss();
+                        mSwipeRefreshLayout.setRefreshing(false);
+                        Toast.makeText(mContext, "Koneksi Internet Bermasalah", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void getDataJsonKat(JSONArray dataArray) {
+        list_kat = new ArrayList<>();
+        list_katid = new ArrayList<>();
+        list_uom = new ArrayList<>();
+        list_iduom = new ArrayList<>();
+        list_kat.add("--Pilih Satuan--");
+        list_katid.add("0");
+        list_uom.add("-");
+        list_iduom.add("0");
+
+
+        if (dataArray.length() > 0) {
+            try {
+                // Ambil objek pertama dari dataArray
+                JSONObject dataObject = dataArray.getJSONObject(0);
+                // Ambil array "data" dari objek tersebut
+                JSONArray dataArrayInside = dataObject.getJSONArray("data");
+                for (int i = 0; i < dataArrayInside.length(); i++) {
+                    JSONObject jo2 = dataArrayInside.getJSONObject(i);
+                    list_kat.add(jo2.getString("namecategory"));
+                    list_katid.add(jo2.getString("idcategory"));
+                    list_uom.add(jo2.getString("uomname"));
+                    list_iduom.add(jo2.getString("iduom"));
+
+                    Log.e("cek uomname",jo2.getString("uomname"));
+                    Log.e("cek namecategory",jo2.getString("namecategory"));
+                    Log.e("cek idcategory",jo2.getString("idcategory"));
+                    Log.e("cek iduom",jo2.getString("iduom"));
+
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+        adapter_kat= new ArrayAdapter<String>(TransaksiTimbangActivity.this, android.R.layout.simple_spinner_item, list_kat);
+        adapter_kat.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        et_cat.setAdapter(adapter_kat);
+
+
+        et_cat.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                kat_id = list_katid.get(position);
+                kat_name = list_kat.get(position);
+                //vsatuan/*uomname*/ = list_uom.get(position);
+                iduom = list_iduom.get(position);
+
+                et_sat.setText(list_uom.get(position));
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
     }
 
     public void onBackPressed() {

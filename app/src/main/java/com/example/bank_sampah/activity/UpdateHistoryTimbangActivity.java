@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -14,7 +15,7 @@ import com.example.bank_sampah.R;
 
 public class UpdateHistoryTimbangActivity extends AppCompatActivity {
     private TextView btn_back;
-    private EditText et_cat;
+    private Spinner et_cat;
     private EditText et_sat;
     private EditText et_bobot;
 
@@ -32,7 +33,7 @@ public class UpdateHistoryTimbangActivity extends AppCompatActivity {
         setContentView(R.layout.activity_update_history_timbang);
 
         btn_back = (TextView) findViewById(R.id.btnBack);
-        et_cat = (EditText) findViewById(R.id.select_category);
+        et_cat = (Spinner) findViewById(R.id.spn_satuan_cat);
         et_sat = (EditText) findViewById(R.id.select_satuan);
         et_bobot = (EditText) findViewById(R.id.input_bobot);
         btn_save = (TextView) findViewById(R.id.save_timbang);
