@@ -36,13 +36,12 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:layout_margin="10dp"
-                            android:gravity="center"
                             android:id="@+id/et_id_member"
                             style="@style/modifiedEditText"
                             android:inputType="textFilter"
                             android:maxLines="1"
                             android:textSize="20dp"
-                            android:hint="Id"/>
+                            android:hint="Code"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
 
@@ -55,7 +54,6 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:layout_margin="10dp"
-                            android:gravity="center"
                             android:id="@+id/et_name_member"
                             style="@style/modifiedEditText"
                             android:inputType="textFilter"
@@ -73,7 +71,6 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:layout_margin="10dp"
-                            android:gravity="center"
                             android:id="@+id/et_mail_member"
                             style="@style/modifiedEditText"
                             android:inputType="textFilter"
@@ -91,7 +88,6 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:layout_margin="10dp"
-                            android:gravity="center"
                             android:id="@+id/et_phone_member"
                             style="@style/modifiedEditText"
                             android:inputType="textPhonetic"
@@ -100,41 +96,24 @@
                             android:hint="Phone"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/textInputPass"
-                        style="@style/parent">
+                    <androidx.appcompat.widget.LinearLayoutCompat
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="10dp"
+                        android:background="@drawable/square">
 
-                        <EditText
+                        <Spinner
+                            android:id="@+id/spn_status"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
-                            android:layout_margin="10dp"
                             android:gravity="center"
-                            android:id="@+id/et_pass_member"
-                            style="@style/modifiedEditText"
-                            android:inputType="textPassword"
+                            android:padding="10dp"
+                            android:layout_margin="5dp"
                             android:maxLines="1"
                             android:textSize="20dp"
-                            android:hint="Pass"/>
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/textInputStatus"
-                        style="@style/parent">
-
-                        <EditText
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_margin="10dp"
-                            android:gravity="center"
-                            android:id="@+id/et_Status_member"
-                            style="@style/modifiedEditText"
-                            android:inputType="text"
-                            android:maxLines="1"
-                            android:textSize="20dp"
-                            android:hint="Status"/>
-                    </com.google.android.material.textfield.TextInputLayout>
+                            />
+                    </androidx.appcompat.widget.LinearLayoutCompat>
 
                 </LinearLayout>
 

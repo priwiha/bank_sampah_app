@@ -27,6 +27,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.UUID;
 
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
@@ -171,22 +172,40 @@ public class MainActivity extends AppCompatActivity {
 
                                             // Ambil objek data dari JSON
                                             JSONObject jsonRESULTS = new JSONObject(response.body().string());
-                                            JSONObject dataObject = jsonRESULTS.getJSONObject("data");
 
-                                            // Buat array JSON baru dan tambahkan objek data ke dalamnya
-                                            JSONArray dataArray = new JSONArray();
-                                            dataArray.put(dataObject);
+                                            if (jsonRESULTS.has("data")) {
+                                                JSONObject dataObject = jsonRESULTS.getJSONObject("data");
 
-                                            // Output array JSON
-                                            //System.out.println(dataArray.toString());
+                                                // Buat array JSON baru dan tambahkan objek data ke dalamnya
+                                                JSONArray dataArray = new JSONArray();
+                                                dataArray.put(dataObject);
 
-                                            Log.e("cek panjang json array",String.valueOf(dataArray.length()));
-                                            if (dataArray.length()>0)
-                                            {
-                                                getDataJsonLogin(dataArray);
+                                                // Output array JSON
+                                                //System.out.println(dataArray.toString());
+
+                                                Log.e("cek panjang json array",String.valueOf(dataArray.length()));
+                                                if (dataArray.length()>0)
+                                                {
+                                                    getDataJsonLogin(dataArray);
+                                                }
+                                                login_layout.setVisibility(View.VISIBLE);
+                                                register_layout.setVisibility(View.GONE);
+
+                                                lg_userid.setText("");
+                                                lg_pass.setText("");
+                                                rg_userid.setText("");
+                                                rg_name.setText("");
+                                                rg_phone.setText("");
+                                                rg_mail.setText("");
+                                                rg_pass.setText("");
+                                                rg_konfpass.setText("");
                                             }
-                                            login_layout.setVisibility(View.VISIBLE);
-                                            register_layout.setVisibility(View.GONE);
+                                            else {
+                                                Toast.makeText(mContext,
+                                                        "Data Tidak Ditemukan !",
+                                                        Toast.LENGTH_SHORT).show();
+                                            }
+
 
                                         } catch (JSONException e) {
                                             e.printStackTrace();
@@ -194,6 +213,10 @@ public class MainActivity extends AppCompatActivity {
                                             e.printStackTrace();
                                         }
                                     } else {
+
+                                        Toast.makeText(mContext,
+                                                "Data Tidak Ditemukan, Periksa Kembali User & Password !",
+                                                Toast.LENGTH_SHORT).show();
                                         Log.i("debug", "onResponse: Tidak Berhasil");
                                         loading.dismiss();
                                     }
@@ -213,13 +236,16 @@ public class MainActivity extends AppCompatActivity {
         rg_register_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                String serialCode = generateSerialCode();
                 if (rg_pass.getText().toString().trim().equals(rg_konfpass.getText().toString().trim())){
+
 
                     ProgressDialog loading = ProgressDialog.show(mContext, null, "Harap Tunggu...", true, false);
 
                     //Toast.makeText(mContext, rg_mail.getText().toString(), Toast.LENGTH_SHORT).show();
 
                     dataService.registerRequest(rg_userid.getText().toString(),
+                            serialCode,
                             rg_name.getText().toString(),
                             rg_mail.getText().toString(),
                             rg_phone.getText().toString(),
@@ -235,22 +261,40 @@ public class MainActivity extends AppCompatActivity {
 
                                             // Ambil objek data dari JSON
                                             JSONObject jsonRESULTS = new JSONObject(response.body().string());
-                                            JSONObject dataObject = jsonRESULTS.getJSONObject("data");
+                                            // Periksa apakah kunci "data" ada di dalam objek JSON
+                                            if (jsonRESULTS.has("data")) {
+                                                JSONObject dataObject = jsonRESULTS.getJSONObject("data");
 
-                                            // Buat array JSON baru dan tambahkan objek data ke dalamnya
-                                            JSONArray dataArray = new JSONArray();
-                                            dataArray.put(dataObject);
+                                                // Buat array JSON baru dan tambahkan objek data ke dalamnya
+                                                JSONArray dataArray = new JSONArray();
+                                                dataArray.put(dataObject);
 
-                                            // Output array JSON
-                                            //System.out.println(dataArray.toString());
+                                                // Output array JSON
+                                                //System.out.println(dataArray.toString());
 
-                                            Log.e("cek panjang json array",String.valueOf(dataArray.length()));
-                                            if (dataArray.length()>0)
-                                            {
-                                                getDataJson(dataArray);
+                                                Log.e("cek panjang json array",String.valueOf(dataArray.length()));
+                                                if (dataArray.length()>0)
+                                                {
+                                                    getDataJson(dataArray);
+                                                }
+
+                                                login_layout.setVisibility(View.VISIBLE);
+                                                register_layout.setVisibility(View.GONE);
+
+                                                lg_userid.setText("");
+                                                lg_pass.setText("");
+                                                rg_userid.setText("");
+                                                rg_name.setText("");
+                                                rg_phone.setText("");
+                                                rg_mail.setText("");
+                                                rg_pass.setText("");
+                                                rg_konfpass.setText("");
                                             }
-                                            login_layout.setVisibility(View.VISIBLE);
-                                            register_layout.setVisibility(View.GONE);
+                                            else{
+                                                Toast.makeText(mContext,
+                                                        rg_userid.getText().toString()+" sudah pernah didaftarkan !",
+                                                        Toast.LENGTH_SHORT).show();
+                                            }
 
                                         } catch (JSONException e) {
                                             e.printStackTrace();
@@ -258,6 +302,10 @@ public class MainActivity extends AppCompatActivity {
                                             e.printStackTrace();
                                         }
                                     } else {
+
+                                        Toast.makeText(mContext,
+                                                "Koneksi Bermasalah, Silahkan Dicoba Kembali !",
+                                                Toast.LENGTH_SHORT).show();
                                         Log.i("debug", "onResponse: Tidak Berhasil");
                                         loading.dismiss();
                                     }
@@ -274,9 +322,21 @@ public class MainActivity extends AppCompatActivity {
             }
             else {
                     Toast.makeText(mContext, "Periksa kembali password", Toast.LENGTH_SHORT).show();
+                    Log.e("cek code",serialCode);
                 }
         }});
 
+    }
+
+    // Method to generate a serial code
+    public static String generateSerialCode() {
+        // Using UUID to create a unique code
+        String serialCode = UUID.randomUUID().toString();
+
+        // Removing "-" characters and trimming to the desired length
+        serialCode = "MBD"+serialCode.replaceAll("-", "").substring(0, 5);
+
+        return serialCode;
     }
 
     private void getDataJsonLogin(JSONArray dataArray) {

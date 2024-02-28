@@ -4,24 +4,30 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 
 import com.example.bank_sampah.R;
 import com.example.bank_sampah.model.MemberDataModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class MemberDataAdapter extends RecyclerView.Adapter<MemberDataAdapter.ViewHolder>{
+public class MemberDataAdapter extends RecyclerView.Adapter<MemberDataAdapter.ViewHolder> implements Filterable {
 
     private List<MemberDataModel> data;
+    //private List<YourData> originalData;
+    private List<MemberDataModel> filteredData;
     private Context context;
 
     public MemberDataAdapter(List<MemberDataModel> Data, Context context) {
         this.data = Data;//model
         this.context = context;
+        this.filteredData = new ArrayList<>(data);
     }
 
 
@@ -37,13 +43,46 @@ public class MemberDataAdapter extends RecyclerView.Adapter<MemberDataAdapter.Vi
     public void onBindViewHolder(@NonNull MemberDataAdapter.ViewHolder holder, int position) {
         MemberDataModel temp = data.get(position);
         holder.id.setText(temp.getId());
-        holder.nama.setText(temp.getName());
+        holder.nama.setText(temp.getName()+" ("+temp.getName()+")");
     }
 
     @Override
     public int getItemCount() {
         //return 0;
-        return data.size();
+        //return data.size();
+        return filteredData.size();
+    }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                String filterPattern = charSequence.toString().toLowerCase().trim();
+
+                FilterResults results = new FilterResults();
+
+                if (filterPattern.isEmpty()) {
+                    results.values = data;
+                } else {
+                    List<MemberDataModel> filteredList = new ArrayList<>();
+                    for (MemberDataModel item : data) {
+                        if (item.getName().toLowerCase().contains(filterPattern)) {
+                            filteredList.add(item);
+                        }
+                    }
+                    results.values = filteredList;
+                }
+
+                return results;
+            }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                filteredData = (List<MemberDataModel>) filterResults.values;
+                notifyDataSetChanged();
+            }
+        };
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

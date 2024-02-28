@@ -3,23 +3,63 @@ package com.example.bank_sampah.activity;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import okhttp3.OkHttpClient;
+import okhttp3.ResponseBody;
+import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import android.Manifest;
 import com.example.bank_sampah.R;
+import com.example.bank_sampah.utility.GlobalData;
+import com.example.bank_sampah.utility.network.UtilsApi;
+import com.example.bank_sampah.utility.network.service.DataService;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.ArrayList;
+
 public class QRCodeScannerActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CAMERA = 1;
+
+    /////retrofit2
+    private DataService dataService;
+    private static final String TAG = QRCodeScannerActivity.class.getSimpleName();
+    /////retrofit2
+
+    //global var
+    GlobalData globalData = GlobalData.getInstance();
+    ArrayList<String> dataList = globalData.getDataList();
+    String userid = dataList.get(0);
+    //global var
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        /////retrofit2
+        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+        OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+        httpClient.addInterceptor(loggingInterceptor);
+
+        Context mContext = QRCodeScannerActivity.this;
+        dataService = UtilsApi.getAPIService();
+        /////retrofit2
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -76,13 +116,68 @@ public class QRCodeScannerActivity extends AppCompatActivity {
                 finish();
             } else {
 
-                Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
-                Intent i = new Intent(QRCodeScannerActivity.this, TransactionMenuActivity.class);
-                i.putExtra("idmember", result.getContents());
-                startActivity(i);
+                 String id_member=result.getContents();
+                cekMember(QRCodeScannerActivity.this,id_member);
+
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
+
+    private void cekMember(Context mContext, String id_member) {
+        //mSwipeRefreshLayout.setRefreshing(true);
+
+        ProgressDialog loading = ProgressDialog.show(mContext, null, "Harap Tunggu...", true, false);
+
+        //Toast.makeText(mContext, rg_mail.getText().toString(), Toast.LENGTH_SHORT).show();
+
+        dataService.GetMemberByCode(id_member).
+                enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        if (response.isSuccessful()){
+                            Log.i("debug", "onResponse: Berhasil");
+                            //Log.i("cek ",String.valueOf(response.body()));
+                            loading.dismiss();
+                            //mSwipeRefreshLayout.setRefreshing(false);
+                            try {
+
+                                // Ambil objek data dari JSON
+                                JSONObject jsonRESULTS = new JSONObject(response.body().string());
+                                if (jsonRESULTS.has("data")) {
+
+                                    Toast.makeText(mContext, "Scanned: " + id_member, Toast.LENGTH_LONG).show();
+                                    Intent i = new Intent(QRCodeScannerActivity.this, TransactionMenuActivity.class);
+                                    i.putExtra("idmember", id_member);
+                                    startActivity(i);
+                                }
+                                else {
+                                    Toast.makeText(mContext, "Data Tidak Ditemukan", Toast.LENGTH_SHORT).show();
+                                }
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            Log.i("debug", "onResponse: Tidak Berhasil");
+                            loading.dismiss();
+                            Toast.makeText(mContext, "Data Tidak Ditemukan", Toast.LENGTH_SHORT).show();
+
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Log.e("debug", "onFailure: ERROR > " + t.getMessage());
+                        loading.dismiss();
+                        //mSwipeRefreshLayout.setRefreshing(false);
+                        Toast.makeText(mContext, "Koneksi Internet Bermasalah", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+
 }

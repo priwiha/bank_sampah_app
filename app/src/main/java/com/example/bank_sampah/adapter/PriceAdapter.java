@@ -1,27 +1,39 @@
 package com.example.bank_sampah.adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.bank_sampah.R;
+import com.example.bank_sampah.activity.MasterPriceActivity;
 import com.example.bank_sampah.model.MasterPriceModel;
+import com.example.bank_sampah.model.MemberDataModel;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.ViewHolder>{
+public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.ViewHolder> implements Filterable {
 
     private List<MasterPriceModel> data;
+    private List<MasterPriceModel> filteredData;
     private Context context;
+    private String formattedDate;
 
     public PriceAdapter(List<MasterPriceModel> Data, Context context) {
         this.data = Data;//model
         this.context = context;
+        this.filteredData = new ArrayList<>(data);
     }
 
 
@@ -45,12 +57,61 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.ViewHolder>{
         }
         holder.id.setText(temp.getTglins());
         holder.nama.setText(temp.getKategori()+" Harga: "+temp.getPrice()+"/"+temp.getSatuan()+" ("+status+")");
+
+
     }
 
     @Override
     public int getItemCount() {
         //return 0;
-        return data.size();
+        //return data.size();
+        return filteredData.size();
+    }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                String filterPattern = charSequence.toString().toLowerCase().trim();
+
+                FilterResults results = new FilterResults();
+
+                if (filterPattern.isEmpty()) {
+                    results.values = data;
+                } else {
+                    List<MasterPriceModel> filteredList = new ArrayList<>();
+                    for (MasterPriceModel item : data) {
+                        String formattedDate = null;
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                            String dateString=item.getTglins();
+                            // Konversi string menjadi objek LocalDate
+                            LocalDate date = LocalDate.parse(dateString, dateFormatter);
+
+                            // Format LocalDate menjadi string dengan pola yang diinginkan
+                            formattedDate = date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+
+                        }
+
+                        if (formattedDate.contains(filterPattern)) {
+
+                            filteredList.add(item);
+                        }
+                    }
+                    results.values = filteredList;
+                    //return results;
+                }
+
+                return results;
+            }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                filteredData = (List<MasterPriceModel>) filterResults.values;
+                notifyDataSetChanged();
+            }
+        };
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

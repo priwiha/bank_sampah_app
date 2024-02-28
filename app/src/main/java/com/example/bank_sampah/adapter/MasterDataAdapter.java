@@ -4,24 +4,31 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 
 import com.example.bank_sampah.R;
 import com.example.bank_sampah.model.MasterDataModel;
+import com.example.bank_sampah.model.MasterPriceModel;
+import com.example.bank_sampah.model.MemberDataModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class MasterDataAdapter  extends RecyclerView.Adapter<MasterDataAdapter.ViewHolder>{
+public class MasterDataAdapter  extends RecyclerView.Adapter<MasterDataAdapter.ViewHolder> implements Filterable {
 
     private List<MasterDataModel> data;
+    private List<MasterDataModel> filteredData;
     private Context context;
 
     public MasterDataAdapter(List<MasterDataModel> Data, Context context) {
         this.data = Data;//model
         this.context = context;
+        this.filteredData = new ArrayList<>(data);
     }
 
 
@@ -43,7 +50,40 @@ public class MasterDataAdapter  extends RecyclerView.Adapter<MasterDataAdapter.V
     @Override
     public int getItemCount() {
         //return 0;
-        return data.size();
+        //return data.size();
+        return filteredData.size();
+    }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                String filterPattern = charSequence.toString().toLowerCase().trim();
+
+                FilterResults results = new FilterResults();
+
+                if (filterPattern.isEmpty()) {
+                    results.values = data;
+                } else {
+                    List<MasterDataModel> filteredList = new ArrayList<>();
+                    for (MasterDataModel item : data) {
+                        if (item.getName().toLowerCase().contains(filterPattern)) {
+                            filteredList.add(item);
+                        }
+                    }
+                    results.values = filteredList;
+                }
+
+                return results;
+            }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                filteredData = (List<MasterDataModel>) filterResults.values;
+                notifyDataSetChanged();
+            }
+        };
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

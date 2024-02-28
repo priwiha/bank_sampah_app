@@ -1,6 +1,7 @@
 package com.example.bank_sampah.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -38,6 +39,7 @@ import java.util.List;
 
 public class CreateOrUpdateCategoryActivity extends AppCompatActivity {
 
+    private SwipeRefreshLayout mSwipeRefreshLayout;
     private LinearLayout lt_add_cat;
     private LinearLayout lt_ch_cat;
 
@@ -61,7 +63,7 @@ public class CreateOrUpdateCategoryActivity extends AppCompatActivity {
     private String satuan="";
 
     private DataService dataService;
-    private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String TAG = CreateOrUpdateCategoryActivity.class.getSimpleName();
     boolean doubleBackToExitPressedOnce = false;
 
     //global var
@@ -86,6 +88,9 @@ public class CreateOrUpdateCategoryActivity extends AppCompatActivity {
         etch_name_cat = (EditText) findViewById(R.id.ch_name_cat);
         spnch_satuan_cat = (Spinner) findViewById(R.id.spn_chsatuan_cat);
 
+        // Inisialisasi SwipeRefreshLayout
+        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
+
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
@@ -100,6 +105,15 @@ public class CreateOrUpdateCategoryActivity extends AppCompatActivity {
 
         //Toast.makeText(CreateOrUpdateCategoryActivity.this,"cek get global var "+userid,Toast.LENGTH_SHORT).show();
 
+        // SwipeRefreshLayout
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                // Panggil metode untuk memuat ulang data
+                //fetchData();
+                getData(mContext,"");
+            }
+        });
 
         back = (TextView) findViewById(R.id.btnBack);
 
@@ -254,22 +268,25 @@ public class CreateOrUpdateCategoryActivity extends AppCompatActivity {
 
                                 // Ambil objek data dari JSON
                                 JSONObject jsonRESULTS = new JSONObject(response.body().string());
-                                JSONObject dataObject = jsonRESULTS.getJSONObject("data");
+                                if (jsonRESULTS.has("data")) {
+                                    JSONObject dataObject = jsonRESULTS.getJSONObject("data");
 
-                                // Buat array JSON baru dan tambahkan objek data ke dalamnya
-                                JSONArray dataArray = new JSONArray();
-                                dataArray.put(dataObject);
+                                    // Buat array JSON baru dan tambahkan objek data ke dalamnya
+                                    JSONArray dataArray = new JSONArray();
+                                    dataArray.put(dataObject);
 
-                                // Output array JSON
-                                System.out.println(dataArray.toString());
+                                    // Output array JSON
+                                    System.out.println(dataArray.toString());
 
-                                Log.e("panjang json array satuan",String.valueOf(dataArray.length()));
-                                if (dataArray.length()>0)
-                                {
-                                    getResponJson(dataArray);
-                                }
+                                    Log.e("panjang json array satuan",String.valueOf(dataArray.length()));
+                                    if (dataArray.length()>0)
+                                    {
+                                        getResponJson(dataArray);
+                                    }
                                 /*login_layout.setVisibility(View.VISIBLE);
                                 register_layout.setVisibility(View.GONE);*/
+                                }
+
 
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -316,6 +333,7 @@ public class CreateOrUpdateCategoryActivity extends AppCompatActivity {
     }
 
     private void getData(Context mContext, String satuan) {
+        mSwipeRefreshLayout.setRefreshing(true);
         ProgressDialog loading = ProgressDialog.show(mContext, null, "Harap Tunggu...", true, false);
 
         //Toast.makeText(mContext, rg_mail.getText().toString(), Toast.LENGTH_SHORT).show();
@@ -328,6 +346,7 @@ public class CreateOrUpdateCategoryActivity extends AppCompatActivity {
                             Log.i("debug", "onResponse: Berhasil");
                             //Log.i("cek ",String.valueOf(response.body()));
                             loading.dismiss();
+                            mSwipeRefreshLayout.setRefreshing(false);
                             try {
 
                                 // Ambil objek data dari JSON
@@ -357,6 +376,7 @@ public class CreateOrUpdateCategoryActivity extends AppCompatActivity {
                         } else {
                             Log.i("debug", "onResponse: Tidak Berhasil");
                             loading.dismiss();
+                            mSwipeRefreshLayout.setRefreshing(false);
                         }
                     }
 
@@ -364,6 +384,7 @@ public class CreateOrUpdateCategoryActivity extends AppCompatActivity {
                     public void onFailure(Call<ResponseBody> call, Throwable t) {
                         Log.e("debug", "onFailure: ERROR > " + t.getMessage());
                         loading.dismiss();
+                        mSwipeRefreshLayout.setRefreshing(false);
                         Toast.makeText(mContext, "Koneksi Internet Bermasalah", Toast.LENGTH_SHORT).show();
                     }
                 });

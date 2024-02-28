@@ -1,6 +1,7 @@
 package com.example.bank_sampah.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -36,7 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CreateOrUpdatePricelistActivity extends AppCompatActivity {
-
+    private SwipeRefreshLayout mSwipeRefreshLayout;
     private TextView back;
     private TextView save;
 
@@ -59,7 +60,7 @@ public class CreateOrUpdatePricelistActivity extends AppCompatActivity {
 
     /////retrofit2
     private DataService dataService;
-    private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String TAG = CreateOrUpdatePricelistActivity.class.getSimpleName();
     /////retrofit2
 
     boolean doubleBackToExitPressedOnce = false;
@@ -83,6 +84,9 @@ public class CreateOrUpdatePricelistActivity extends AppCompatActivity {
         satuan = (EditText) findViewById(R.id.add_satuan_cat);
         tgl = (EditText) findViewById(R.id.add_tanggal_cat);
         status = (EditText) findViewById(R.id.add_status_cat);
+
+        // Inisialisasi SwipeRefreshLayout
+        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
 
         /////retrofit2
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
@@ -127,8 +131,6 @@ public class CreateOrUpdatePricelistActivity extends AppCompatActivity {
                 status.setEnabled(false);
 
 
-
-
             }
             else {
                 //kategori.setText(vkategori);
@@ -148,6 +150,16 @@ public class CreateOrUpdatePricelistActivity extends AppCompatActivity {
 
         // methode ini berfungsi untuk mendeklarasikan widget yang ada di layout
         initComponents(mContext);
+
+        // SwipeRefreshLayout
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                // Panggil metode untuk memuat ulang data
+                //fetchData();
+                initComponents(mContext);
+            }
+        });
 
         back.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -189,22 +201,25 @@ public class CreateOrUpdatePricelistActivity extends AppCompatActivity {
 
                                 // Ambil objek data dari JSON
                                 JSONObject jsonRESULTS = new JSONObject(response.body().string());
-                                JSONObject dataObject = jsonRESULTS.getJSONObject("data");
+                                if (jsonRESULTS.has("data")) {
+                                    JSONObject dataObject = jsonRESULTS.getJSONObject("data");
 
-                                // Buat array JSON baru dan tambahkan objek data ke dalamnya
-                                JSONArray dataArray = new JSONArray();
-                                dataArray.put(dataObject);
+                                    // Buat array JSON baru dan tambahkan objek data ke dalamnya
+                                    JSONArray dataArray = new JSONArray();
+                                    dataArray.put(dataObject);
 
-                                // Output array JSON
-                                System.out.println(dataArray.toString());
+                                    // Output array JSON
+                                    System.out.println(dataArray.toString());
 
-                                Log.e("panjang json array satuan",String.valueOf(dataArray.length()));
-                                if (dataArray.length()>0)
-                                {
-                                    getResponJson(dataArray);
-                                }
+                                    Log.e("panjang json array satuan",String.valueOf(dataArray.length()));
+                                    if (dataArray.length()>0)
+                                    {
+                                        getResponJson(dataArray);
+                                    }
                                 /*login_layout.setVisibility(View.VISIBLE);
                                 register_layout.setVisibility(View.GONE);*/
+                                }
+
 
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -254,7 +269,7 @@ public class CreateOrUpdatePricelistActivity extends AppCompatActivity {
 
     private void initComponents(Context mContext) {
 
-        //mSwipeRefreshLayout.setRefreshing(true);
+        mSwipeRefreshLayout.setRefreshing(true);
 
         ProgressDialog loading = ProgressDialog.show(mContext, null, "Harap Tunggu...", true, false);
 
@@ -268,7 +283,7 @@ public class CreateOrUpdatePricelistActivity extends AppCompatActivity {
                             Log.i("debug", "onResponse: Berhasil");
                             //Log.i("cek ",String.valueOf(response.body()));
                             loading.dismiss();
-                            //mSwipeRefreshLayout.setRefreshing(false);
+                            mSwipeRefreshLayout.setRefreshing(false);
                             try {
 
                                 // Ambil objek data dari JSON
@@ -298,7 +313,7 @@ public class CreateOrUpdatePricelistActivity extends AppCompatActivity {
                         } else {
                             Log.i("debug", "onResponse: Tidak Berhasil");
                             loading.dismiss();
-                            //mSwipeRefreshLayout.setRefreshing(false);
+                            mSwipeRefreshLayout.setRefreshing(false);
                         }
                     }
 
@@ -306,7 +321,7 @@ public class CreateOrUpdatePricelistActivity extends AppCompatActivity {
                     public void onFailure(Call<ResponseBody> call, Throwable t) {
                         Log.e("debug", "onFailure: ERROR > " + t.getMessage());
                         loading.dismiss();
-                        //mSwipeRefreshLayout.setRefreshing(false);
+                        mSwipeRefreshLayout.setRefreshing(false);
                         Toast.makeText(mContext, "Koneksi Internet Bermasalah", Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -348,9 +363,24 @@ public class CreateOrUpdatePricelistActivity extends AppCompatActivity {
             }
         }
 
+
         adapter_kat= new ArrayAdapter<String>(CreateOrUpdatePricelistActivity.this, android.R.layout.simple_spinner_item, list_kat);
         adapter_kat.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         kategori.setAdapter(adapter_kat);
+
+        if (!vkategori.trim().isEmpty()){
+            //set default spinner
+            //if (!vsatuan.equals("")) {
+            for (int i = 0; i < list_kat.size(); i++) {
+                if (vkategori.equals(list_kat.get(i))) {
+                    Log.e("cek list kategori", list_kat.get(i) + " = " + vkategori);
+                    Log.e("cek list satuan", list_uom.get(i) + " = " + vsatuan);
+                    kategori.setSelection(i);
+                    satuan.setText(vsatuan);
+                }
+            }
+            //}
+        }
         kategori.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {

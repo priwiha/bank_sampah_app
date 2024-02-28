@@ -16,8 +16,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,6 +50,7 @@ public class MasterKategoriActivity extends AppCompatActivity {
 
     private TextView btn_add;
     private TextView btn_back;
+    private EditText search_name;
 
     /////retrofit2
     private DataService dataService;
@@ -60,6 +65,8 @@ public class MasterKategoriActivity extends AppCompatActivity {
     String userid = dataList.get(0);
     //global var
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,6 +75,9 @@ public class MasterKategoriActivity extends AppCompatActivity {
         rcv_master = (RecyclerView) findViewById(R.id.rcv_datamaster);
         btn_add = (TextView) findViewById(R.id.btnAddCat);
         btn_back = (TextView) findViewById(R.id.btnBack);
+        search_name = (EditText) findViewById(R.id.input_name);
+
+
         // Inisialisasi SwipeRefreshLayout
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
 
@@ -231,6 +241,24 @@ public class MasterKategoriActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+
+        search_name.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                // Not needed for this example
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                // Invoke the filter method when text changes
+                adapter.getFilter().filter(charSequence);
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                // Not needed for this example
+            }
+        });
     }
 
     public void onBackPressed() {

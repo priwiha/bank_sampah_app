@@ -21,6 +21,7 @@ public interface DataService extends Parcelable {
     @FormUrlEncoded
     @POST("user/create")
     Call<ResponseBody> registerRequest(@Field("userid") String userid,
+                                       @Field("membercode") String code,
                                        @Field("name") String name,
                                        @Field("email") String mail,
                                        @Field("phone") String telpon,
@@ -67,6 +68,24 @@ public interface DataService extends Parcelable {
 
     @GET("price/index")
     Call<ResponseBody> PricelistRequestAll();
+    ////////////CRUD PROCESS PRICE
+
+
+    ////////////CRUD PROCESS MEMBER
+    @FormUrlEncoded
+    @POST("member/getbycode")
+    Call<ResponseBody> GetMemberByCode(@Field("membercode") String id);
+
+    @GET("member/index")
+    Call<ResponseBody> MemberRequestAll();
+    @FormUrlEncoded
+    @POST("member/updatemember")
+    Call<ResponseBody> MemberUpdate(@Field("userid") String id,
+                                    @Field("name") String name,
+                                    @Field("notelp") String notelp,
+                                    @Field("mail") String mail,
+                                    @Field("chuserid") String chuserid,
+                                    @Field("aktif") String aktif);
     ////////////CRUD PROCESS PRICE
 
 }

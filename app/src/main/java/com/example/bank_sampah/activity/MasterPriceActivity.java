@@ -11,13 +11,19 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,7 +42,9 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
@@ -49,10 +57,11 @@ public class MasterPriceActivity extends AppCompatActivity {
 
     private TextView btn_add;
     private TextView btn_back;
+    private EditText search_date;
 
     /////retrofit2
     private DataService dataService;
-    private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String TAG = MasterPriceActivity.class.getSimpleName();
     /////retrofit2
     boolean doubleBackToExitPressedOnce = false;
 
@@ -62,6 +71,7 @@ public class MasterPriceActivity extends AppCompatActivity {
     String userid = dataList.get(0);
     //global var
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,6 +80,7 @@ public class MasterPriceActivity extends AppCompatActivity {
         rcv_master = (RecyclerView) findViewById(R.id.rcv_datamaster);
         btn_add = (TextView) findViewById(R.id.btnAddCat);
         btn_back = (TextView) findViewById(R.id.btnBack);
+        search_date = (EditText) findViewById(R.id.input_name);
 
         // Inisialisasi SwipeRefreshLayout
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
@@ -263,7 +274,61 @@ public class MasterPriceActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+
+        // Tambahkan OnClickListener ke EditText untuk memunculkan DatePickerDialog
+        search_date.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showDatePickerDialog();
+            }
+        });
+
+        // Tambahkan TextWatcher ke EditText untuk filter saat teks berubah
+        search_date.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                // Not needed for this example
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                // Invoke the filter method when text changes
+                adapter.getFilter().filter(charSequence);
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                // Not needed for this example
+            }
+        });
+
     }
+
+    private void showDatePickerDialog() {
+        final Calendar currentDate = Calendar.getInstance();
+        int year = currentDate.get(Calendar.YEAR);
+        int month = currentDate.get(Calendar.MONTH);
+        int day = currentDate.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker datePicker, int selectedYear, int selectedMonth, int selectedDay) {
+                // Handle date selection and update EditText
+                Calendar selectedDate = Calendar.getInstance();
+                selectedDate.set(selectedYear, selectedMonth, selectedDay);
+
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                search_date.setText(sdf.format(selectedDate.getTime()));
+            }
+        }, year, month, day);
+
+        datePickerDialog.show();
+    }
+
+    // Metode ini mengembalikan daftar data Anda (dummy data atau dari sumber data lainnya)
+    /*private List<MasterPriceModel> getYourDataList() {
+        // Implementasikan sesuai dengan kebutuhan Anda
+    }*/
 
     public void onBackPressed() {
         if (doubleBackToExitPressedOnce) {

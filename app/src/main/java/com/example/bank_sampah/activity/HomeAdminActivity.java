@@ -3,8 +3,16 @@ package com.example.bank_sampah.activity;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import okhttp3.OkHttpClient;
+import okhttp3.ResponseBody;
+import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -20,7 +28,14 @@ import com.example.bank_sampah.R;
 import com.example.bank_sampah.adapter.AdminMenuAdapter;
 import com.example.bank_sampah.model.AdminMenuModel;
 import com.example.bank_sampah.utility.GlobalData;
+import com.example.bank_sampah.utility.network.UtilsApi;
+import com.example.bank_sampah.utility.network.service.DataService;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +53,10 @@ public class HomeAdminActivity extends AppCompatActivity {
     private int offset_m=0;
     private int dariSearchC=0;
 
+    /////retrofit2
+    private DataService dataService;
+    private static final String TAG = HomeAdminActivity.class.getSimpleName();
+    /////retrofit2
     boolean doubleBackToExitPressedOnce = false;
 
     //global var
@@ -53,9 +72,18 @@ public class HomeAdminActivity extends AppCompatActivity {
 
         btn_scan = (TextView) findViewById(R.id.btnscan);
         input_kode = (EditText) findViewById(R.id.input_code);
-
-
         rcv_menu = (RecyclerView) findViewById(R.id.rcv_menu);
+
+        /////retrofit2
+        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+        OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+        httpClient.addInterceptor(loggingInterceptor);
+
+        Context mContext = HomeAdminActivity.this;
+        dataService = UtilsApi.getAPIService();
+        /////retrofit2
 
         //Toast.makeText(HomeAdminActivity.this,"cek get global var "+userid,Toast.LENGTH_SHORT).show();
 
@@ -97,14 +125,11 @@ public class HomeAdminActivity extends AppCompatActivity {
                     dariSearchC = 1;
                     //populate_cust(offset_b, srch_cust.getText().toString(), ListAllCustomer.this);
                     dariSearchC = 0;
-                    Toast.makeText(HomeAdminActivity.this,
-                            "Id Member : " +input_kode.getText().toString(), Toast.LENGTH_SHORT).show();
+                    /*Toast.makeText(HomeAdminActivity.this,
+                            "Id Member : " +input_kode.getText().toString(), Toast.LENGTH_SHORT).show();*/
 
                     if (!input_kode.getText().toString().trim().isEmpty()){
-
-                        Intent i = new Intent(HomeAdminActivity.this, TransactionMenuActivity.class);
-                        i.putExtra("idmember", input_kode.getText().toString());
-                        startActivity(i);
+                        cekMember(mContext,input_kode.getText().toString());
                     }
 
                     input_kode.setText("");
@@ -115,14 +140,11 @@ public class HomeAdminActivity extends AppCompatActivity {
                     Log.e("Scan Barcode", String.valueOf(input_kode.getText()));
 
                     input_kode.requestFocus();
-                    Toast.makeText(HomeAdminActivity.this,
-                            "Id Member QR: " +input_kode.getText().toString(), Toast.LENGTH_SHORT).show();
+                    /*Toast.makeText(HomeAdminActivity.this,
+                            "Id Member QR: " +input_kode.getText().toString(), Toast.LENGTH_SHORT).show();*/
 
                     if (!input_kode.getText().toString().trim().isEmpty()){
-
-                        Intent i = new Intent(HomeAdminActivity.this, TransactionMenuActivity.class);
-                        i.putExtra("idmember", input_kode.getText().toString());
-                        startActivity(i);
+                        cekMember(mContext,input_kode.getText().toString());
                     }
 
                     input_kode.setText("");
@@ -196,6 +218,60 @@ public class HomeAdminActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void cekMember(Context mContext, String id_member) {
+        //mSwipeRefreshLayout.setRefreshing(true);
+
+        ProgressDialog loading = ProgressDialog.show(mContext, null, "Harap Tunggu...", true, false);
+
+        //Toast.makeText(mContext, rg_mail.getText().toString(), Toast.LENGTH_SHORT).show();
+
+        dataService.GetMemberByCode(id_member).
+                enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        if (response.isSuccessful()){
+                            Log.i("debug", "onResponse: Berhasil");
+                            //Log.i("cek ",String.valueOf(response.body()));
+                            loading.dismiss();
+                            //mSwipeRefreshLayout.setRefreshing(false);
+                            try {
+
+                                // Ambil objek data dari JSON
+                                JSONObject jsonRESULTS = new JSONObject(response.body().string());
+                                if (jsonRESULTS.has("data")) {
+
+                                    Intent i = new Intent(HomeAdminActivity.this, TransactionMenuActivity.class);
+                                    i.putExtra("idmember", id_member);
+                                    startActivity(i);
+                                }
+                                else {
+                                    Toast.makeText(mContext, "Data Tidak Ditemukan", Toast.LENGTH_SHORT).show();
+                                }
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            Log.i("debug", "onResponse: Tidak Berhasil");
+                            loading.dismiss();
+                            //mSwipeRefreshLayout.setRefreshing(false);
+                            Toast.makeText(mContext, "Data Tidak Ditemukan", Toast.LENGTH_SHORT).show();
+
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Log.e("debug", "onFailure: ERROR > " + t.getMessage());
+                        loading.dismiss();
+                        //mSwipeRefreshLayout.setRefreshing(false);
+                        Toast.makeText(mContext, "Koneksi Internet Bermasalah", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     public void onBackPressed() {
