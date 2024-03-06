@@ -44,7 +44,7 @@ public class MasterDataAdapter  extends RecyclerView.Adapter<MasterDataAdapter.V
     public void onBindViewHolder(@NonNull MasterDataAdapter.ViewHolder holder, int position) {
         MasterDataModel temp = data.get(position);
         holder.id.setText(temp.getName());
-        holder.nama.setText("Satuan = "+temp.getSatuan());
+        holder.nama.setText("Satuan per "+temp.getSatuan_nm());
     }
 
     @Override

@@ -26,7 +26,9 @@ import com.example.bank_sampah.adapter.TransactionMenuAdapter;
 import com.example.bank_sampah.model.AdminMenuModel;
 import com.example.bank_sampah.utility.GlobalData;
 import com.example.bank_sampah.utility.network.UtilsApi;
+import com.example.bank_sampah.utility.network.response.ApiResponse;
 import com.example.bank_sampah.utility.network.service.DataService;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,6 +41,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class TransactionMenuActivity extends AppCompatActivity {
 
@@ -50,7 +53,7 @@ public class TransactionMenuActivity extends AppCompatActivity {
     private TextView tvtelp;
     private TextView tvdate;
 
-    private String id_member;
+    private String id_member,status,amt,nama,telp,mail,user;
 
     private RecyclerView rcv_menu;
     private List<AdminMenuModel> list;
@@ -148,6 +151,9 @@ public class TransactionMenuActivity extends AppCompatActivity {
         list.add(new AdminMenuModel("2","Reedem",""));
         list.add(new AdminMenuModel("3","Histori Timbang",""));
         list.add(new AdminMenuModel("4","Histori Reedem",""));
+        if (status=="T"){
+            list.add(new AdminMenuModel("5","Update Profile",""));
+        }
         //list.add(new AdminMenuModel("5","Back",""));
         adapter = new TransactionMenuAdapter(list,this);//array dimasukkan ke adapter
         rcv_menu.setAdapter(adapter);
@@ -174,13 +180,23 @@ public class TransactionMenuActivity extends AppCompatActivity {
 
                 if (list.get(position).getIdmenu().toString().equals("1"))
                 {
-                    Intent i = new Intent(TransactionMenuActivity.this, TransaksiTimbangActivity.class);
-                    //i.putExtra("kode_po", list.get(position).getNopo().toString());
-                    startActivity(i);
+                    if (status=="T"){
+                        Toast.makeText(TransactionMenuActivity.this,"Member Non-Aktif !",Toast.LENGTH_SHORT).show();
+                    }
+                    else {
+                        Intent i = new Intent(TransactionMenuActivity.this, TransaksiTimbangActivity.class);
+                        //i.putExtra("kode_po", list.get(position).getNopo().toString());
+                        startActivity(i);
+                    }
                 } else if (list.get(position).getIdmenu().toString().equals("2")) {
-                    Intent i = new Intent(TransactionMenuActivity.this, TransaksiReedemActivity.class);
-                    //i.putExtra("kode_po", list.get(position).getNopo().toString());
-                    startActivity(i);
+                    if (status=="T"){
+                        Toast.makeText(TransactionMenuActivity.this,"Member Non-Aktif !",Toast.LENGTH_SHORT).show();
+                    }
+                    else {
+                        Intent i = new Intent(TransactionMenuActivity.this, TransaksiReedemActivity.class);
+                        //i.putExtra("kode_po", list.get(position).getNopo().toString());
+                        startActivity(i);
+                    }
                 } else if (list.get(position).getIdmenu().toString().equals("3")){
                     Intent i = new Intent(TransactionMenuActivity.this, HistoryTimbangActivity.class);
                     //i.putExtra("kode_po", list.get(position).getNopo().toString());
@@ -190,27 +206,102 @@ public class TransactionMenuActivity extends AppCompatActivity {
                     startActivity(i);
                     finish();
                 }
-                /*else if (list.get(position).getIdmenu().toString().equals("5")){
-                    Intent i = new Intent(TransactionMenuActivity.this, HomeAdminActivity.class);
+                else if (list.get(position).getIdmenu().toString().equals("5")){
+                    Intent i = new Intent(TransactionMenuActivity.this, ApprovalOrUpdateMemberActivity.class);
+                    i.putExtra("add_or_update", "update");
+                    i.putExtra("id", id_member);
+                    i.putExtra("username", user);
+                    i.putExtra("name", nama);
+                    i.putExtra("phone", telp);
+                    i.putExtra("mail", mail);
+                    i.putExtra("status", status);
                     startActivity(i);
                     finish();
-                }*/
+                }
             }
         });
     }
 
     public void initComponents(Context mContext, String id_member) {
+
         mSwipeRefreshLayout.setRefreshing(true);
 
         ProgressDialog loading = ProgressDialog.show(mContext, null, "Harap Tunggu...", true, false);
-
-        //Toast.makeText(mContext, rg_mail.getText().toString(), Toast.LENGTH_SHORT).show();
 
         dataService.GetMemberByCode(id_member).
                 enqueue(new Callback<ResponseBody>() {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                        if (response.isSuccessful()){
+                        if (response.isSuccessful()) {
+                            try {
+                                String responseBodyString = response.body().string();
+                                ApiResponse apiResponse = new Gson().fromJson(responseBodyString, ApiResponse.class);
+
+                                if (apiResponse != null && apiResponse.isSuccess()) {
+                                    // Tanggapan sukses, lakukan sesuatu di sini
+                                    Log.i("debug", "onResponse: Berhasil");
+                                    //Log.i("cek ",String.valueOf(response.body()));
+                                    loading.dismiss();
+                                    try {
+                                        boolean success = apiResponse.isSuccess();
+                                        String message = apiResponse.getMessage();
+                                        System.out.println("Success: " + success);
+                                        System.out.println("Message: " + message);
+
+                                        // Ambil objek data dari JSON
+                                        JSONObject jsonRESULTS = new JSONObject(responseBodyString);
+                                        // Periksa apakah kunci "data" ada di dalam objek JSON
+                                        if (jsonRESULTS.has("data")) {
+                                            JSONObject dataObject = jsonRESULTS.getJSONObject("data");
+
+                                            // Buat array JSON baru dan tambahkan objek data ke dalamnya
+                                            JSONArray dataArray = new JSONArray();
+                                            dataArray.put(dataObject);
+
+                                            // Output array JSON
+                                            System.out.println(dataArray.toString());
+
+                                            Log.e("panjang json array satuan",String.valueOf(dataArray.length()));
+                                            if (dataArray.length()>0)
+                                            {
+                                                getResponJson(dataArray);
+                                            }
+                                        }
+                                        else{
+                                            Toast.makeText(mContext,
+                                                    message,
+                                                    Toast.LENGTH_SHORT).show();
+                                        }
+
+
+                                    } catch (JSONException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                }
+                                else {
+
+                                    loading.dismiss();
+                                    // Tanggapan API sukses, tetapi ada kesalahan aplikasi
+                                    String errorMessage = apiResponse != null ? apiResponse.getMessage() : "Unknown error";
+                                    // Tampilkan errorMessage atau lakukan tindakan lain
+                                    Toast.makeText(mContext,errorMessage,Toast.LENGTH_SHORT).show();
+                                }
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                        else {
+                            loading.dismiss();
+                            // Tanggapan HTTP tidak berhasil
+                            try {
+                                String errorBody = response.errorBody().string();
+                                // Tangani errorBody sesuai kebutuhan
+                                Toast.makeText(mContext,errorBody,Toast.LENGTH_SHORT).show();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        /*if (response.isSuccessful()){
                             Log.i("debug", "onResponse: Berhasil");
                             //Log.i("cek ",String.valueOf(response.body()));
                             loading.dismiss();
@@ -234,8 +325,6 @@ public class TransactionMenuActivity extends AppCompatActivity {
                                     {
                                         getResponJson(dataArray);
                                     }
-                                /*login_layout.setVisibility(View.VISIBLE);
-                                register_layout.setVisibility(View.GONE);*/
                                 }
 
                             } catch (JSONException e) {
@@ -247,7 +336,7 @@ public class TransactionMenuActivity extends AppCompatActivity {
                             Log.i("debug", "onResponse: Tidak Berhasil");
                             loading.dismiss();
                             mSwipeRefreshLayout.setRefreshing(false);
-                        }
+                        }*/
                     }
 
                     @Override
@@ -255,7 +344,7 @@ public class TransactionMenuActivity extends AppCompatActivity {
                         Log.e("debug", "onFailure: ERROR > " + t.getMessage());
                         loading.dismiss();
                         mSwipeRefreshLayout.setRefreshing(false);
-                        Toast.makeText(mContext, "Koneksi Internet Bermasalah", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mContext,t.getMessage(),Toast.LENGTH_SHORT).show();
                     }
                 });
 
@@ -263,10 +352,6 @@ public class TransactionMenuActivity extends AppCompatActivity {
 
     private void getResponJson(JSONArray dataArray) {
         if (dataArray.length() > 0) {
-            String amt="";
-            String nama="";
-            String telp="";
-            String mail="";
             try{
                 for (int x = 0; x < dataArray.length(); x++)
                 {
@@ -275,6 +360,8 @@ public class TransactionMenuActivity extends AppCompatActivity {
                     nama = child.getString("name");
                     telp = child.getString("notelp");
                     mail = child.getString("mail");
+                    status = child.getString("aktif");
+                    user = child.getString("userid");
                 }
             }catch (JSONException e) {
                 throw new RuntimeException(e);

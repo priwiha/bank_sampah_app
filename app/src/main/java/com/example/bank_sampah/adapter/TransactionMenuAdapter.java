@@ -57,11 +57,11 @@ public class TransactionMenuAdapter  extends RecyclerView.Adapter<TransactionMen
 
             Drawable drawable = ContextCompat.getDrawable(context, R.drawable.claim);
             holder.image_Menu.setImageDrawable(drawable);
-        } /*else if (temp.getIdmenu().equals("5")) {
+        } else if (temp.getIdmenu().equals("5")) {
 
-            Drawable drawable = ContextCompat.getDrawable(context, R.drawable.back);
+            Drawable drawable = ContextCompat.getDrawable(context, R.drawable.member);
             holder.image_Menu.setImageDrawable(drawable);
-        }*/
+        }
     }
 
     @Override

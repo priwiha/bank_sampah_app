@@ -23,7 +23,9 @@ import android.widget.Toast;
 import com.example.bank_sampah.R;
 import com.example.bank_sampah.utility.GlobalData;
 import com.example.bank_sampah.utility.network.UtilsApi;
+import com.example.bank_sampah.utility.network.response.ApiResponse;
 import com.example.bank_sampah.utility.network.service.DataService;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -129,49 +131,79 @@ public class TransaksiReedemActivity extends AppCompatActivity {
 
         ProgressDialog loading = ProgressDialog.show(mContext, null, "Harap Tunggu...", true, false);
 
-        //Toast.makeText(mContext, rg_mail.getText().toString(), Toast.LENGTH_SHORT).show();
-
+        //Toast.makeText(mContext, rg_mail.getText().toString(), Toast.LENGTH_SHORT).show()
         dataService.GetMemberByCode(id_member).
                 enqueue(new Callback<ResponseBody>() {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                        if (response.isSuccessful()){
-                            Log.i("debug", "onResponse: Berhasil");
-                            //Log.i("cek ",String.valueOf(response.body()));
-                            loading.dismiss();
-                            mSwipeRefreshLayout.setRefreshing(false);
+                        if (response.isSuccessful()) {
                             try {
+                                String responseBodyString = response.body().string();
+                                ApiResponse apiResponse = new Gson().fromJson(responseBodyString, ApiResponse.class);
 
-                                // Ambil objek data dari JSON
-                                JSONObject jsonRESULTS = new JSONObject(response.body().string());
-                                if (jsonRESULTS.has("data")) {
-                                    JSONObject dataObject = jsonRESULTS.getJSONObject("data");
+                                if (apiResponse != null && apiResponse.isSuccess()) {
+                                    // Tanggapan sukses, lakukan sesuatu di sini
+                                    Log.i("debug", "onResponse: Berhasil");
+                                    //Log.i("cek ",String.valueOf(response.body()));
+                                    loading.dismiss();
+                                    try {
+                                        boolean success = apiResponse.isSuccess();
+                                        String message = apiResponse.getMessage();
+                                        System.out.println("Success: " + success);
+                                        System.out.println("Message: " + message);
 
-                                    // Buat array JSON baru dan tambahkan objek data ke dalamnya
-                                    JSONArray dataArray = new JSONArray();
-                                    dataArray.put(dataObject);
+                                        // Ambil objek data dari JSON
+                                        JSONObject jsonRESULTS = new JSONObject(responseBodyString);
+                                        // Periksa apakah kunci "data" ada di dalam objek JSON
+                                        if (jsonRESULTS.has("data")) {
+                                            JSONObject dataObject = jsonRESULTS.getJSONObject("data");
 
-                                    // Output array JSON
-                                    System.out.println(dataArray.toString());
+                                            // Buat array JSON baru dan tambahkan objek data ke dalamnya
+                                            JSONArray dataArray = new JSONArray();
+                                            dataArray.put(dataObject);
 
-                                    Log.e("panjang json array satuan",String.valueOf(dataArray.length()));
-                                    if (dataArray.length()>0)
-                                    {
-                                        getResponJson(dataArray);
+                                            // Output array JSON
+                                            System.out.println(dataArray.toString());
+
+                                            Log.e("panjang json array satuan",String.valueOf(dataArray.length()));
+                                            if (dataArray.length()>0)
+                                            {
+                                                getResponJson(dataArray);
+                                            }
+                                        }
+                                        else{
+                                            Toast.makeText(mContext,
+                                                    message,
+                                                    Toast.LENGTH_SHORT).show();
+                                        }
+
+
+                                    } catch (JSONException e) {
+                                        throw new RuntimeException(e);
                                     }
-                                /*login_layout.setVisibility(View.VISIBLE);
-                                register_layout.setVisibility(View.GONE);*/
                                 }
+                                else {
 
-                            } catch (JSONException e) {
-                                e.printStackTrace();
+                                    loading.dismiss();
+                                    // Tanggapan API sukses, tetapi ada kesalahan aplikasi
+                                    String errorMessage = apiResponse != null ? apiResponse.getMessage() : "Unknown error";
+                                    // Tampilkan errorMessage atau lakukan tindakan lain
+                                    Toast.makeText(mContext,errorMessage,Toast.LENGTH_SHORT).show();
+                                }
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                        else {
+                            loading.dismiss();
+                            // Tanggapan HTTP tidak berhasil
+                            try {
+                                String errorBody = response.errorBody().string();
+                                // Tangani errorBody sesuai kebutuhan
+                                Toast.makeText(mContext,errorBody,Toast.LENGTH_SHORT).show();
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
-                        } else {
-                            Log.i("debug", "onResponse: Tidak Berhasil");
-                            loading.dismiss();
-                            mSwipeRefreshLayout.setRefreshing(false);
                         }
                     }
 
@@ -180,7 +212,7 @@ public class TransaksiReedemActivity extends AppCompatActivity {
                         Log.e("debug", "onFailure: ERROR > " + t.getMessage());
                         loading.dismiss();
                         mSwipeRefreshLayout.setRefreshing(false);
-                        Toast.makeText(mContext, "Koneksi Internet Bermasalah", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mContext,t.getMessage(),Toast.LENGTH_SHORT).show();
                     }
                 });
     }

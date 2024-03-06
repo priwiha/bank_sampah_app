@@ -26,17 +26,21 @@ import android.widget.Toast;
 import com.example.bank_sampah.R;
 import com.example.bank_sampah.utility.GlobalData;
 import com.example.bank_sampah.utility.network.UtilsApi;
+import com.example.bank_sampah.utility.network.response.ApiResponse;
 import com.example.bank_sampah.utility.network.service.DataService;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class TransaksiTimbangActivity extends AppCompatActivity {
     private SwipeRefreshLayout mSwipeRefreshLayout;
@@ -45,6 +49,7 @@ public class TransaksiTimbangActivity extends AppCompatActivity {
     private Spinner et_cat;
     private EditText et_sat;
     private EditText et_bobot;
+    private EditText et_harga;
 
     private TextView tvNama;
     private TextView tvtelp;
@@ -52,8 +57,8 @@ public class TransaksiTimbangActivity extends AppCompatActivity {
 
     private TextView btn_save;
 
-    private String kat_id,kat_name,uomname,iduom;
-    private List<String> list_kat,list_katid,list_uom,list_iduom;
+    private String kat_id,kat_name,uomname,iduom,harga;
+    private List<String> list_kat,list_katid,list_uom,list_iduom,list_harga;
     private ArrayAdapter<String> adapter_kat;
 
     /////retrofit2
@@ -78,12 +83,14 @@ public class TransaksiTimbangActivity extends AppCompatActivity {
         et_cat = (Spinner) findViewById(R.id.spn_satuan_cat);
         et_sat = (EditText) findViewById(R.id.select_satuan);
         et_bobot = (EditText) findViewById(R.id.input_bobot);
+        et_harga = (EditText) findViewById(R.id.select_harga);
         btn_save = (TextView) findViewById(R.id.save_timbang);
         tvNama = (TextView) findViewById(R.id.tvnama);
         tvtelp = (TextView) findViewById(R.id.tvtelp);
         tvdate = (TextView) findViewById(R.id.tvdate);
 
         et_sat.setEnabled(false);
+        et_harga.setEnabled(false);
 
 
         // Inisialisasi SwipeRefreshLayout
@@ -125,6 +132,13 @@ public class TransaksiTimbangActivity extends AppCompatActivity {
             }
         });
 
+        btn_save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                createTimbang(id_member,kat_id,iduom,et_bobot.getText().toString(),harga,userid,mContext);
+            }
+        });
+
         btn_back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -135,26 +149,34 @@ public class TransaksiTimbangActivity extends AppCompatActivity {
         });
     }
 
-    private void initComponents(Context mContext, String id_member) {
-        mSwipeRefreshLayout.setRefreshing(true);
+    private void createTimbang(String id_member, String kat_id, String iduom, String bobot,
+                               String harga, String userid, Context mContext) {
 
         ProgressDialog loading = ProgressDialog.show(mContext, null, "Harap Tunggu...", true, false);
 
-        //Toast.makeText(mContext, rg_mail.getText().toString(), Toast.LENGTH_SHORT).show();
+        //Toast.makeText(mContext, price, Toast.LENGTH_SHORT).show();
+        //Call<ApiResponse> call = dataService.CreateTimbang(id_member,kat_id,iduom,bobot,harga, userid);
+        dataService.CreateTimbang(id_member,kat_id,iduom,bobot,harga, userid).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    try {
+                        String responseBodyString = response.body().string();
+                        ApiResponse apiResponse = new Gson().fromJson(responseBodyString, ApiResponse.class);
 
-        dataService.GetMemberByCode(id_member).
-                enqueue(new Callback<ResponseBody>() {
-                    @Override
-                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                        if (response.isSuccessful()){
+                        if (apiResponse != null && apiResponse.isSuccess()) {
+                            // Tanggapan sukses, lakukan sesuatu di sini
                             Log.i("debug", "onResponse: Berhasil");
                             //Log.i("cek ",String.valueOf(response.body()));
                             loading.dismiss();
-                            mSwipeRefreshLayout.setRefreshing(false);
                             try {
+                                boolean success = apiResponse.isSuccess();
+                                String message = apiResponse.getMessage();
+                                System.out.println("Success: " + success);
+                                System.out.println("Message: " + message);
 
                                 // Ambil objek data dari JSON
-                                JSONObject jsonRESULTS = new JSONObject(response.body().string());
+                                JSONObject jsonRESULTS = new JSONObject(responseBodyString);
                                 if (jsonRESULTS.has("data")) {
                                     JSONObject dataObject = jsonRESULTS.getJSONObject("data");
 
@@ -168,21 +190,154 @@ public class TransaksiTimbangActivity extends AppCompatActivity {
                                     Log.e("panjang json array satuan",String.valueOf(dataArray.length()));
                                     if (dataArray.length()>0)
                                     {
-                                        getResponJson(dataArray);
+                                        getResponTimbangJson(dataArray);
                                     }
-                                /*login_layout.setVisibility(View.VISIBLE);
-                                register_layout.setVisibility(View.GONE);*/
                                 }
 
                             } catch (JSONException e) {
                                 e.printStackTrace();
+                            }
+                        } else {
+                            loading.dismiss();
+                            // Tanggapan API sukses, tetapi ada kesalahan aplikasi
+                            String errorMessage = apiResponse != null ? apiResponse.getMessage() : "Unknown error";
+                            // Tampilkan errorMessage atau lakukan tindakan lain
+                            Toast.makeText(mContext,errorMessage,Toast.LENGTH_SHORT).show();
+                        }
+
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                } else {
+                    loading.dismiss();
+                    // Tanggapan HTTP tidak berhasil
+                    try {
+                        String errorBody = response.errorBody().string();
+                        // Tangani errorBody sesuai kebutuhan
+                        Toast.makeText(mContext,errorBody,Toast.LENGTH_SHORT).show();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                // Kesalahan koneksi atau respons tidak berhasil
+                loading.dismiss();
+                t.printStackTrace();
+
+                Toast.makeText(mContext,t.getMessage(),Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void getResponTimbangJson(JSONArray dataArray) {
+        if (dataArray.length() > 0) {
+            String idtimbang="";
+            String totalamt="";
+            String membercode="";
+            try{
+                for (int x = 0; x < dataArray.length(); x++)
+                {
+                    JSONObject child = dataArray.getJSONObject(x);
+                    membercode = child.getString("membercode");
+                    totalamt = child.getString("pricetot");
+                    idtimbang = child.getString("idgrb");
+
+
+
+                }
+                Log.e( "id transaksi"+idtimbang,"member "+membercode+" berhasil diproses harga "+totalamt);
+
+                Intent i = new Intent(TransaksiTimbangActivity.this, HistoryTimbangActivity.class);
+                startActivity(i);
+                finish();
+            }catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void initComponents(Context mContext, String id_member) {
+        mSwipeRefreshLayout.setRefreshing(true);
+
+        ProgressDialog loading = ProgressDialog.show(mContext, null, "Harap Tunggu...", true, false);
+
+        //Toast.makeText(mContext, rg_mail.getText().toString(), Toast.LENGTH_SHORT).show();
+        dataService.GetMemberByCode(id_member).
+                enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        if (response.isSuccessful()) {
+                            try {
+                                String responseBodyString = response.body().string();
+                                ApiResponse apiResponse = new Gson().fromJson(responseBodyString, ApiResponse.class);
+
+                                if (apiResponse != null && apiResponse.isSuccess()) {
+                                    // Tanggapan sukses, lakukan sesuatu di sini
+                                    Log.i("debug", "onResponse: Berhasil");
+                                    //Log.i("cek ",String.valueOf(response.body()));
+                                    loading.dismiss();
+                                    try {
+                                        boolean success = apiResponse.isSuccess();
+                                        String message = apiResponse.getMessage();
+                                        System.out.println("Success: " + success);
+                                        System.out.println("Message: " + message);
+
+                                        // Ambil objek data dari JSON
+                                        JSONObject jsonRESULTS = new JSONObject(responseBodyString);
+                                        // Periksa apakah kunci "data" ada di dalam objek JSON
+                                        if (jsonRESULTS.has("data")) {
+                                            JSONObject dataObject = jsonRESULTS.getJSONObject("data");
+
+                                            // Buat array JSON baru dan tambahkan objek data ke dalamnya
+                                            JSONArray dataArray = new JSONArray();
+                                            dataArray.put(dataObject);
+
+                                            // Output array JSON
+                                            System.out.println(dataArray.toString());
+
+                                            Log.e("panjang json array satuan",String.valueOf(dataArray.length()));
+                                            if (dataArray.length()>0)
+                                            {
+                                                getResponJson(dataArray);
+                                            }
+                                        }
+                                        else{
+                                            Toast.makeText(mContext,
+                                                    message,
+                                                    Toast.LENGTH_SHORT).show();
+                                        }
+
+
+                                    } catch (JSONException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                }
+                                else {
+
+                                    loading.dismiss();
+                                    // Tanggapan API sukses, tetapi ada kesalahan aplikasi
+                                    String errorMessage = apiResponse != null ? apiResponse.getMessage() : "Unknown error";
+                                    // Tampilkan errorMessage atau lakukan tindakan lain
+                                    Toast.makeText(mContext,errorMessage,Toast.LENGTH_SHORT).show();
+                                }
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                        else {
+                            loading.dismiss();
+                            // Tanggapan HTTP tidak berhasil
+                            try {
+                                String errorBody = response.errorBody().string();
+                                // Tangani errorBody sesuai kebutuhan
+                                Toast.makeText(mContext,errorBody,Toast.LENGTH_SHORT).show();
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
-                        } else {
-                            Log.i("debug", "onResponse: Tidak Berhasil");
-                            loading.dismiss();
-                            mSwipeRefreshLayout.setRefreshing(false);
                         }
                     }
 
@@ -191,7 +346,7 @@ public class TransaksiTimbangActivity extends AppCompatActivity {
                         Log.e("debug", "onFailure: ERROR > " + t.getMessage());
                         loading.dismiss();
                         mSwipeRefreshLayout.setRefreshing(false);
-                        Toast.makeText(mContext, "Koneksi Internet Bermasalah", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mContext,t.getMessage(),Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -227,10 +382,7 @@ public class TransaksiTimbangActivity extends AppCompatActivity {
         mSwipeRefreshLayout.setRefreshing(true);
 
         ProgressDialog loading = ProgressDialog.show(mContext, null, "Harap Tunggu...", true, false);
-
-        //Toast.makeText(mContext, rg_mail.getText().toString(), Toast.LENGTH_SHORT).show();
-
-        dataService.CategoryRequestAll().
+        dataService.GetCategoryPrice().
                 enqueue(new Callback<ResponseBody>() {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -257,8 +409,6 @@ public class TransaksiTimbangActivity extends AppCompatActivity {
                                 {
                                     getDataJsonKat(dataArray);
                                 }
-                                /*login_layout.setVisibility(View.VISIBLE);
-                                register_layout.setVisibility(View.GONE);*/
 
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -277,7 +427,7 @@ public class TransaksiTimbangActivity extends AppCompatActivity {
                         Log.e("debug", "onFailure: ERROR > " + t.getMessage());
                         loading.dismiss();
                         mSwipeRefreshLayout.setRefreshing(false);
-                        Toast.makeText(mContext, "Koneksi Internet Bermasalah", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mContext,t.getMessage(),Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -287,10 +437,12 @@ public class TransaksiTimbangActivity extends AppCompatActivity {
         list_katid = new ArrayList<>();
         list_uom = new ArrayList<>();
         list_iduom = new ArrayList<>();
+        list_harga = new ArrayList<>();
         list_kat.add("--Pilih Satuan--");
         list_katid.add("0");
         list_uom.add("-");
         list_iduom.add("0");
+        list_harga.add("0");
 
 
         if (dataArray.length() > 0) {
@@ -305,6 +457,7 @@ public class TransaksiTimbangActivity extends AppCompatActivity {
                     list_katid.add(jo2.getString("idcategory"));
                     list_uom.add(jo2.getString("uomname"));
                     list_iduom.add(jo2.getString("iduom"));
+                    list_harga.add(jo2.getString("price"));
 
                     Log.e("cek uomname",jo2.getString("uomname"));
                     Log.e("cek namecategory",jo2.getString("namecategory"));
@@ -331,8 +484,18 @@ public class TransaksiTimbangActivity extends AppCompatActivity {
                 kat_name = list_kat.get(position);
                 //vsatuan/*uomname*/ = list_uom.get(position);
                 iduom = list_iduom.get(position);
-
                 et_sat.setText(list_uom.get(position));
+
+                harga = list_harga.get(position);
+
+                // Mengonversi string menjadi double
+                double angka = Double.parseDouble(list_harga.get(position));
+                // Membuat format rupiah
+                NumberFormat formatRupiah = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
+                // Menggunakan format rupiah untuk mengonversi angka menjadi string dengan separator
+                String angkaFormatted = formatRupiah.format(angka);
+                et_harga.setText(angkaFormatted);
+
 
             }
 

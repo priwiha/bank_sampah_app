@@ -53,22 +53,56 @@
 
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/textInputSatuan"
-                        style="@style/parent">
+                    <androidx.appcompat.widget.LinearLayoutCompat
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
 
-                        <EditText
-                            android:layout_width="match_parent"
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/textInputHarga"
+                            android:layout_weight="1"
+                            style="@style/parent">
+
+                            <EditText
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_margin="10dp"
+                                android:id="@+id/select_harga"
+                                style="@style/modifiedEditText"
+                                android:inputType="textFilter"
+                                android:maxLines="1"
+                                android:textSize="20dp"
+                                android:hint="Harga"/>
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
-                            android:layout_margin="10dp"
-                            android:id="@+id/select_satuan"
-                            style="@style/modifiedEditText"
-                            android:inputType="textFilter"
-                            android:maxLines="1"
-                            android:textSize="20dp"
-                            android:hint="Satuan"/>
-                    </com.google.android.material.textfield.TextInputLayout>
+                            android:textSize="50dp"
+                            android:text="/"/>
+
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/textInputSatuan"
+                            android:layout_weight="2"
+                            style="@style/parent">
+
+                            <EditText
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_margin="10dp"
+                                android:id="@+id/select_satuan"
+                                style="@style/modifiedEditText"
+                                android:inputType="textFilter"
+                                android:maxLines="1"
+                                android:textSize="20dp"
+                                android:hint="Satuan"/>
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                    </androidx.appcompat.widget.LinearLayoutCompat>
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/textInputBobot"

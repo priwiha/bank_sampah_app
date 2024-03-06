@@ -27,7 +27,9 @@ import android.widget.Toast;
 import com.example.bank_sampah.R;
 import com.example.bank_sampah.utility.GlobalData;
 import com.example.bank_sampah.utility.network.UtilsApi;
+import com.example.bank_sampah.utility.network.response.ApiResponse;
 import com.example.bank_sampah.utility.network.service.DataService;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -158,11 +160,12 @@ public class CreateOrUpdateCategoryActivity extends AppCompatActivity {
         btn_add_cat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //name=etadd_name_cat.getText().toString();
                 if (!sat_id.equalsIgnoreCase("0")) {
                     //Toast.makeText(CreateOrUpdateCategoryActivity.this,sat_id+"-"+sat_name,Toast.LENGTH_SHORT).show();
-                    if (!etadd_name_cat.getText().toString().trim().isEmpty())
+                    if (!name.trim().isEmpty())
                     {
-                        saveCategory(etadd_name_cat.getText().toString(),sat_id,userid,mContext);
+                        saveCategory(name,sat_id,userid,mContext);
                     }
                     else {
                         Toast.makeText(CreateOrUpdateCategoryActivity.this,"Nama Kategori tidak boleh kosong",Toast.LENGTH_SHORT).show();
@@ -179,8 +182,9 @@ public class CreateOrUpdateCategoryActivity extends AppCompatActivity {
         btn_ch_cat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //name=etch_name_cat.getText().toString();
                 if (!sat_id.equalsIgnoreCase("0")) {
-                    if (!etadd_name_cat.getText().toString().trim().isEmpty())
+                    if (!etch_name_cat.getText().toString().trim().isEmpty())
                     {
                         ChangeCategory(id,etch_name_cat.getText().toString(),sat_id,userid,mContext);
                     }
@@ -260,6 +264,88 @@ public class CreateOrUpdateCategoryActivity extends AppCompatActivity {
                 enqueue(new Callback<ResponseBody>() {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        if (response.isSuccessful()) {
+                            try {
+                                String responseBodyString = response.body().string();
+                                ApiResponse apiResponse = new Gson().fromJson(responseBodyString, ApiResponse.class);
+
+                                if (apiResponse != null && apiResponse.isSuccess()) {
+                                    // Tanggapan sukses, lakukan sesuatu di sini
+                                    Log.i("debug", "onResponse: Berhasil");
+                                    //Log.i("cek ",String.valueOf(response.body()));
+                                    loading.dismiss();
+                                    try {
+                                        boolean success = apiResponse.isSuccess();
+                                        String message = apiResponse.getMessage();
+                                        System.out.println("Success: " + success);
+                                        System.out.println("Message: " + message);
+
+                                        // Ambil objek data dari JSON
+                                        JSONObject jsonRESULTS = new JSONObject(responseBodyString);
+                                        // Periksa apakah kunci "data" ada di dalam objek JSON
+                                        if (jsonRESULTS.has("data")) {
+                                            JSONObject dataObject = jsonRESULTS.getJSONObject("data");
+
+                                            // Buat array JSON baru dan tambahkan objek data ke dalamnya
+                                            JSONArray dataArray = new JSONArray();
+                                            dataArray.put(dataObject);
+
+                                            // Output array JSON
+                                            System.out.println(dataArray.toString());
+
+                                            Log.e("panjang json array satuan",String.valueOf(dataArray.length()));
+                                            if (dataArray.length()>0)
+                                            {
+                                                getResponJson(dataArray);
+                                            }
+                                        }
+                                        else{
+                                            Toast.makeText(mContext,
+                                                    message,
+                                                    Toast.LENGTH_SHORT).show();
+                                        }
+
+
+                                    } catch (JSONException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                }
+                                else {
+
+                                    loading.dismiss();
+                                    // Tanggapan API sukses, tetapi ada kesalahan aplikasi
+                                    String errorMessage = apiResponse != null ? apiResponse.getMessage() : "Unknown error";
+                                    // Tampilkan errorMessage atau lakukan tindakan lain
+                                    Toast.makeText(mContext,errorMessage,Toast.LENGTH_SHORT).show();
+                                }
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                        else {
+                            loading.dismiss();
+                            // Tanggapan HTTP tidak berhasil
+                            try {
+                                String errorBody = response.errorBody().string();
+                                // Tangani errorBody sesuai kebutuhan
+                                Toast.makeText(mContext,errorBody,Toast.LENGTH_SHORT).show();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Log.e("debug", "onFailure: ERROR > " + t.getMessage());
+                        loading.dismiss();
+                        mSwipeRefreshLayout.setRefreshing(false);
+                        Toast.makeText(mContext,t.getMessage(),Toast.LENGTH_SHORT).show();
+                    }
+                });
+                /*enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         if (response.isSuccessful()){
                             Log.i("debug", "onResponse: Berhasil");
                             //Log.i("cek ",String.valueOf(response.body()));
@@ -283,8 +369,8 @@ public class CreateOrUpdateCategoryActivity extends AppCompatActivity {
                                     {
                                         getResponJson(dataArray);
                                     }
-                                /*login_layout.setVisibility(View.VISIBLE);
-                                register_layout.setVisibility(View.GONE);*/
+                                *//*login_layout.setVisibility(View.VISIBLE);
+                                register_layout.setVisibility(View.GONE);*//*
                                 }
 
 
@@ -305,7 +391,7 @@ public class CreateOrUpdateCategoryActivity extends AppCompatActivity {
                         loading.dismiss();
                         Toast.makeText(mContext, "Koneksi Internet Bermasalah", Toast.LENGTH_SHORT).show();
                     }
-                });
+                });*/
     }
 
     private void getResponJson(JSONArray dataArray) {
@@ -342,6 +428,88 @@ public class CreateOrUpdateCategoryActivity extends AppCompatActivity {
                 enqueue(new Callback<ResponseBody>() {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        if (response.isSuccessful()) {
+                            try {
+                                String responseBodyString = response.body().string();
+                                ApiResponse apiResponse = new Gson().fromJson(responseBodyString, ApiResponse.class);
+
+                                if (apiResponse != null && apiResponse.isSuccess()) {
+                                    // Tanggapan sukses, lakukan sesuatu di sini
+                                    Log.i("debug", "onResponse: Berhasil");
+                                    //Log.i("cek ",String.valueOf(response.body()));
+                                    loading.dismiss();
+                                    try {
+                                        boolean success = apiResponse.isSuccess();
+                                        String message = apiResponse.getMessage();
+                                        System.out.println("Success: " + success);
+                                        System.out.println("Message: " + message);
+
+                                        // Ambil objek data dari JSON
+                                        JSONObject jsonRESULTS = new JSONObject(responseBodyString);
+                                        // Periksa apakah kunci "data" ada di dalam objek JSON
+                                        if (jsonRESULTS.has("data")) {
+                                            JSONObject dataObject = jsonRESULTS.getJSONObject("data");
+
+                                            // Buat array JSON baru dan tambahkan objek data ke dalamnya
+                                            JSONArray dataArray = new JSONArray();
+                                            dataArray.put(dataObject);
+
+                                            // Output array JSON
+                                            System.out.println(dataArray.toString());
+
+                                            Log.e("panjang json array satuan",String.valueOf(dataArray.length()));
+                                            if (dataArray.length()>0)
+                                            {
+                                                getDataJson(dataArray,satuan);
+                                            }
+                                        }
+                                        else{
+                                            Toast.makeText(mContext,
+                                                    message,
+                                                    Toast.LENGTH_SHORT).show();
+                                        }
+
+
+                                    } catch (JSONException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                }
+                                else {
+
+                                    loading.dismiss();
+                                    // Tanggapan API sukses, tetapi ada kesalahan aplikasi
+                                    String errorMessage = apiResponse != null ? apiResponse.getMessage() : "Unknown error";
+                                    // Tampilkan errorMessage atau lakukan tindakan lain
+                                    Toast.makeText(mContext,errorMessage,Toast.LENGTH_SHORT).show();
+                                }
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                        else {
+                            loading.dismiss();
+                            // Tanggapan HTTP tidak berhasil
+                            try {
+                                String errorBody = response.errorBody().string();
+                                // Tangani errorBody sesuai kebutuhan
+                                Toast.makeText(mContext,errorBody,Toast.LENGTH_SHORT).show();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Log.e("debug", "onFailure: ERROR > " + t.getMessage());
+                        loading.dismiss();
+                        mSwipeRefreshLayout.setRefreshing(false);
+                        Toast.makeText(mContext,t.getMessage(),Toast.LENGTH_SHORT).show();
+                    }
+                });
+                /*enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         if (response.isSuccessful()){
                             Log.i("debug", "onResponse: Berhasil");
                             //Log.i("cek ",String.valueOf(response.body()));
@@ -365,8 +533,8 @@ public class CreateOrUpdateCategoryActivity extends AppCompatActivity {
                                 {
                                     getDataJson(dataArray,satuan);
                                 }
-                                /*login_layout.setVisibility(View.VISIBLE);
-                                register_layout.setVisibility(View.GONE);*/
+                                *//*login_layout.setVisibility(View.VISIBLE);
+                                register_layout.setVisibility(View.GONE);*//*
 
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -387,7 +555,7 @@ public class CreateOrUpdateCategoryActivity extends AppCompatActivity {
                         mSwipeRefreshLayout.setRefreshing(false);
                         Toast.makeText(mContext, "Koneksi Internet Bermasalah", Toast.LENGTH_SHORT).show();
                     }
-                });
+                });*/
     }
 
 
@@ -404,8 +572,15 @@ public class CreateOrUpdateCategoryActivity extends AppCompatActivity {
 
         if (dataArray.length() > 0) {
             try {
+                for (int x = 0; x < dataArray.length(); x++)
+                {
+                    JSONObject jo2 = dataArray.getJSONObject(x);
+                    list_sat.add(jo2.getString("uomname"));
+                    list_satid.add(jo2.getString("iduom"));
+                }
+
                 // Ambil objek pertama dari dataArray
-                JSONObject dataObject = dataArray.getJSONObject(0);
+                /*JSONObject dataObject = dataArray.getJSONObject(0);
                 // Ambil array "data" dari objek tersebut
                 JSONArray dataArrayInside = dataObject.getJSONArray("data");
                 for (int i = 0; i < dataArrayInside.length(); i++) {
@@ -416,7 +591,7 @@ public class CreateOrUpdateCategoryActivity extends AppCompatActivity {
                     Log.e("cek uomname",jo2.getString("uomname"));
                     Log.e("cek iduom",jo2.getString("iduom"));
 
-                }
+                }*/
             } catch (JSONException e) {
                 e.printStackTrace();
             }

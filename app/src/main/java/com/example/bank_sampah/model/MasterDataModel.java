@@ -1,10 +1,11 @@
 package com.example.bank_sampah.model;
 
 public class MasterDataModel {
-    public MasterDataModel(String id, String name, String satuan) {
+    public MasterDataModel(String id, String name, String satuan, String satuan_nm) {
         this.id = id;
         this.name = name;
         this.satuan = satuan;
+        this.satuan_nm = satuan_nm;
     }
 
     public String getId() {
@@ -36,4 +37,14 @@ public class MasterDataModel {
 
 
     private String satuan;
+
+    public String getSatuan_nm() {
+        return satuan_nm;
+    }
+
+    public void setSatuan_nm(String satuan_nm) {
+        this.satuan_nm = satuan_nm;
+    }
+
+    private String satuan_nm;
 }

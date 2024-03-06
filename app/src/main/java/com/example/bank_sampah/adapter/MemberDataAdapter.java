@@ -44,7 +44,7 @@ public class MemberDataAdapter extends RecyclerView.Adapter<MemberDataAdapter.Vi
         MemberDataModel temp = data.get(position);
         holder.id.setText(temp.getId());
         String status="";
-        if (temp.getStatus()=="Y") {
+        if (temp.getStatus().equalsIgnoreCase("Y")) {
             status = "Aktif";
         }
         else {

@@ -2,6 +2,8 @@ package com.example.bank_sampah.utility.network.service;
 
 import android.os.Parcelable;
 
+import com.example.bank_sampah.utility.network.response.ApiResponse;
+
 import java.util.List;
 
 import okhttp3.ResponseBody;
@@ -88,4 +90,19 @@ public interface DataService extends Parcelable {
                                     @Field("aktif") String aktif);
     ////////////CRUD PROCESS PRICE
 
+
+    ///////////TRANSAKSI
+    @GET("transaksi/getprice")
+    Call<ResponseBody> GetCategoryPrice();
+
+    @FormUrlEncoded
+    @POST("transaksi/timbang")
+    Call<ResponseBody> CreateTimbang(@Field("membercode") String membercode,
+                                    @Field("idcategory") String idcategory,
+                                    @Field("iduom") String iduom,
+                                    @Field("qty") String bobot,
+                                    @Field("price") String harga,
+                                    @Field("userid") String userid);
+
+    ///////////TRANSAKSI
 }
