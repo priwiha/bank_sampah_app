@@ -233,59 +233,39 @@ public class TransactionMenuActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         if (response.isSuccessful()) {
+                            loading.dismiss();
+                            mSwipeRefreshLayout.setRefreshing(false);
                             try {
-                                String responseBodyString = response.body().string();
-                                ApiResponse apiResponse = new Gson().fromJson(responseBodyString, ApiResponse.class);
+                                String ResponseString = response.body().string();
+                                // Ambil objek data dari JSON
+                                JSONObject jsonRESULTS = new JSONObject(ResponseString);
+                                String MessageString = jsonRESULTS.get("message").toString();
 
-                                if (apiResponse != null && apiResponse.isSuccess()) {
-                                    // Tanggapan sukses, lakukan sesuatu di sini
-                                    Log.i("debug", "onResponse: Berhasil");
-                                    //Log.i("cek ",String.valueOf(response.body()));
-                                    loading.dismiss();
-                                    try {
-                                        boolean success = apiResponse.isSuccess();
-                                        String message = apiResponse.getMessage();
-                                        System.out.println("Success: " + success);
-                                        System.out.println("Message: " + message);
-
-                                        // Ambil objek data dari JSON
-                                        JSONObject jsonRESULTS = new JSONObject(responseBodyString);
-                                        // Periksa apakah kunci "data" ada di dalam objek JSON
-                                        if (jsonRESULTS.has("data")) {
-                                            JSONObject dataObject = jsonRESULTS.getJSONObject("data");
-
-                                            // Buat array JSON baru dan tambahkan objek data ke dalamnya
-                                            JSONArray dataArray = new JSONArray();
-                                            dataArray.put(dataObject);
-
-                                            // Output array JSON
-                                            System.out.println(dataArray.toString());
-
-                                            Log.e("panjang json array satuan",String.valueOf(dataArray.length()));
-                                            if (dataArray.length()>0)
-                                            {
-                                                getResponJson(dataArray);
-                                            }
-                                        }
-                                        else{
-                                            Toast.makeText(mContext,
-                                                    message,
-                                                    Toast.LENGTH_SHORT).show();
-                                        }
+                                if (jsonRESULTS.has("data")) {
+                                    JSONObject dataObject = jsonRESULTS.getJSONObject("data");
 
 
-                                    } catch (JSONException e) {
-                                        throw new RuntimeException(e);
+                                    System.out.println(MessageString.toString());
+
+                                    // Buat array JSON baru dan tambahkan objek data ke dalamnya
+                                    JSONArray dataArray = new JSONArray();
+                                    dataArray.put(dataObject);
+
+                                    // Output array JSON
+                                    System.out.println(dataArray.toString());
+
+                                    Log.e("panjang json array satuan", String.valueOf(dataArray.length()));
+
+                                    if (dataArray.length() > 0) {
+                                        getResponJson(dataArray);
+                                        System.out.println(MessageString);
+
+                                    } else {
+                                        System.out.println(MessageString);
                                     }
                                 }
-                                else {
-
-                                    loading.dismiss();
-                                    // Tanggapan API sukses, tetapi ada kesalahan aplikasi
-                                    String errorMessage = apiResponse != null ? apiResponse.getMessage() : "Unknown error";
-                                    // Tampilkan errorMessage atau lakukan tindakan lain
-                                    Toast.makeText(mContext,errorMessage,Toast.LENGTH_SHORT).show();
-                                }
+                            } catch (JSONException e) {
+                                throw new RuntimeException(e);
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
                             }

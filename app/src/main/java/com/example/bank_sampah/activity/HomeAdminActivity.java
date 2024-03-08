@@ -38,8 +38,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import static com.google.android.material.internal.ViewUtils.hideKeyboard;
 
@@ -235,7 +237,35 @@ public class HomeAdminActivity extends AppCompatActivity {
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         if (response.isSuccessful()) {
                             try {
-                                String responseBodyString = response.body().string();
+                                String ResponseString = response.body().string();
+                                // Ambil objek data dari JSON
+                                JSONObject jsonRESULTS = new JSONObject(ResponseString);
+                                String MessageString = jsonRESULTS.get("message").toString();
+
+                                if (jsonRESULTS.has("data")) {
+                                    JSONObject dataObject = jsonRESULTS.getJSONObject("data");
+
+
+                                    System.out.println(MessageString.toString());
+
+                                    // Buat array JSON baru dan tambahkan objek data ke dalamnya
+                                    JSONArray dataArray = new JSONArray();
+                                    dataArray.put(dataObject);
+
+                                    // Output array JSON
+                                    System.out.println(dataArray.toString());
+
+                                    Log.e("panjang json array satuan", String.valueOf(dataArray.length()));
+
+                                    if (dataArray.length() > 0) {
+                                        getResponJson(dataArray);
+                                        System.out.println(MessageString);
+
+                                    } else {
+                                        System.out.println(MessageString);
+                                    }
+                                }
+                                /*String responseBodyString = response.body().string();
                                 ApiResponse apiResponse = new Gson().fromJson(responseBodyString, ApiResponse.class);
 
                                 if (apiResponse != null && apiResponse.isSuccess()) {
@@ -284,7 +314,9 @@ public class HomeAdminActivity extends AppCompatActivity {
                                     String errorMessage = apiResponse != null ? apiResponse.getMessage() : "Unknown error";
                                     // Tampilkan errorMessage atau lakukan tindakan lain
                                     Toast.makeText(mContext,errorMessage,Toast.LENGTH_SHORT).show();
-                                }
+                                }*/
+                            } catch (JSONException e) {
+                                throw new RuntimeException(e);
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
                             }
@@ -310,6 +342,27 @@ public class HomeAdminActivity extends AppCompatActivity {
                         Toast.makeText(mContext,t.getMessage(),Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    private void getResponJson(JSONArray dataArray) {
+        if (dataArray.length() > 0) {
+            String id_member="";
+            try{
+                for (int x = 0; x < dataArray.length(); x++)
+                {
+                    JSONObject child = dataArray.getJSONObject(x);
+                    id_member = child.getString("membercode");
+                }
+
+                Intent i = new Intent(HomeAdminActivity.this, TransactionMenuActivity.class);
+                i.putExtra("idmember", id_member);
+                startActivity(i);
+
+            }catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
     }
 
     public void onBackPressed() {
