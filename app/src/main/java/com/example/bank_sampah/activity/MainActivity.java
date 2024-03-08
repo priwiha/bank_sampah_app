@@ -159,85 +159,60 @@ public class MainActivity extends AppCompatActivity {
 
                     ProgressDialog loading = ProgressDialog.show(mContext, null, "Harap Tunggu...", true, false);
 
-                    //Toast.makeText(mContext, rg_mail.getText().toString(), Toast.LENGTH_SHORT).show();
                     dataService.LoginRequest(lg_userid.getText().toString(),
                             lg_pass.getText().toString()).enqueue(new Callback<ResponseBody>() {
                         @Override
                         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                            if (response.isSuccessful()) {
-                                try {
-                                    String responseBodyString = response.body().string();
-                                    ApiResponse apiResponse = new Gson().fromJson(responseBodyString, ApiResponse.class);
-
-                                    if (apiResponse != null && apiResponse.isSuccess()) {
-                                        // Tanggapan sukses, lakukan sesuatu di sini
-                                        Log.i("debug", "onResponse: Berhasil");
-                                        //Log.i("cek ",String.valueOf(response.body()));
-                                        loading.dismiss();
-
-                                        try {
-
-                                            boolean success = apiResponse.isSuccess();
-                                            String message = apiResponse.getMessage();
-                                            System.out.println("Success: " + success);
-                                            System.out.println("Message: " + message);
-
-                                            // Ambil objek data dari JSON
-                                            JSONObject jsonRESULTS = new JSONObject(responseBodyString);
-
-                                            if (jsonRESULTS.has("data")) {
-                                                JSONObject dataObject = jsonRESULTS.getJSONObject("data");
-
-                                                // Buat array JSON baru dan tambahkan objek data ke dalamnya
-                                                JSONArray dataArray = new JSONArray();
-                                                dataArray.put(dataObject);
-
-                                                Log.e("cek panjang json array",String.valueOf(dataArray.length()));
-                                                if (dataArray.length()>0)
-                                                {
-                                                    getDataJsonLogin(dataArray);
-                                                }
-                                                login_layout.setVisibility(View.VISIBLE);
-                                                register_layout.setVisibility(View.GONE);
-
-                                                lg_userid.setText("");
-                                                lg_pass.setText("");
-                                                rg_userid.setText("");
-                                                rg_name.setText("");
-                                                rg_phone.setText("");
-                                                rg_mail.setText("");
-                                                rg_pass.setText("");
-                                                rg_konfpass.setText("");
-                                                Toast.makeText(mContext,
-                                                        message,
-                                                        Toast.LENGTH_SHORT).show();
-                                            }
-                                            else {
-
-                                                Toast.makeText(mContext,
-                                                        message,
-                                                        Toast.LENGTH_SHORT).show();
-                                            }
-
-                                        } catch (JSONException e) {
-                                            throw new RuntimeException(e);
-                                        }
-
-                                    }
-                                    else {
-                                        loading.dismiss();
-                                        // Tanggapan API sukses, tetapi ada kesalahan aplikasi
-                                        String errorMessage = apiResponse != null ? apiResponse.getMessage() : "Unknown error";
-                                        // Tampilkan errorMessage atau lakukan tindakan lain
-                                        Toast.makeText(mContext,errorMessage,Toast.LENGTH_SHORT).show();
-
-                                    }
-                                } catch (IOException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            }
-                            else{
+                            if (response.isSuccessful()){
+                                Log.i("debug", "onResponse: Berhasil");
+                                //Log.i("cek ",String.valueOf(response.body()));
                                 loading.dismiss();
+                                try {
+                                    String ResponseString = response.body().string();
+                                    // Ambil objek data dari JSON
+                                    JSONObject jsonRESULTS = new JSONObject(ResponseString);
+                                    String MessageString = jsonRESULTS.get("message").toString();
+
+                                    if (jsonRESULTS.has("data")) {
+                                        JSONObject dataObject = jsonRESULTS.getJSONObject("data");
+
+
+                                        System.out.println(MessageString.toString());
+
+                                        // Buat array JSON baru dan tambahkan objek data ke dalamnya
+                                        JSONArray dataArray = new JSONArray();
+                                        dataArray.put(dataObject);
+
+                                        // Output array JSON
+                                        System.out.println(dataArray.toString());
+
+                                        Log.e("panjang json array satuan", String.valueOf(dataArray.length()));
+
+                                        if (dataArray.length() > 0) {
+                                            getDataJsonLogin(dataArray);
+                                            System.out.println(MessageString);
+
+                                            lg_userid.setText("");
+                                            lg_pass.setText("");
+                                            rg_userid.setText("");
+                                            rg_name.setText("");
+                                            rg_phone.setText("");
+                                            rg_mail.setText("");
+                                            rg_pass.setText("");
+                                            rg_konfpass.setText("");
+                                        } else {
+                                            System.out.println(MessageString);
+                                        }
+                                    }
+                                    Toast.makeText(mContext,MessageString,Toast.LENGTH_SHORT).show();
+
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            } else {
+                                Log.i("debug", "onResponse: Tidak Berhasil");
                                 // Tanggapan HTTP tidak berhasil
                                 try {
                                     String errorBody = response.errorBody().string();
@@ -246,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
-
+                                loading.dismiss();
                             }
                         }
 
@@ -259,95 +234,6 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
 
-                    /*dataService.LoginRequest(lg_userid.getText().toString(),
-                                    lg_pass.getText().toString()).
-                            enqueue(new Callback<ResponseBody>() {
-                                @Override
-                                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                                    if (response.isSuccessful()){
-                                        try {
-                                            String responseBodyString = response.body().string();
-                                            ApiResponse apiResponse = new Gson().fromJson(responseBodyString, ApiResponse.class);
-                                            if (apiResponse != null && apiResponse.isSuccess()) {
-                                                // Tanggapan sukses, lakukan sesuatu di sini
-                                                Log.i("debug", "onResponse: Berhasil");
-                                                //Log.i("cek ",String.valueOf(response.body()));
-                                                loading.dismiss();
-
-
-                                                boolean success = apiResponse.isSuccess();
-                                                String message = apiResponse.getMessage();
-                                                System.out.println("Success: " + success);
-                                                System.out.println("Message: " + message);
-
-                                                // Ambil objek data dari JSON
-                                                JSONObject jsonRESULTS = new JSONObject(responseBodyString);
-                                                if (jsonRESULTS.has("data")) {
-                                                    JSONObject dataObject = jsonRESULTS.getJSONObject("data");
-
-                                                    // Buat array JSON baru dan tambahkan objek data ke dalamnya
-                                                    JSONArray dataArray = new JSONArray();
-                                                    dataArray.put(dataObject);
-
-                                                    Log.e("cek panjang json array",String.valueOf(dataArray.length()));
-                                                    if (dataArray.length()>0)
-                                                    {
-                                                        getDataJsonLogin(dataArray);
-                                                    }
-                                                    login_layout.setVisibility(View.VISIBLE);
-                                                    register_layout.setVisibility(View.GONE);
-
-                                                    lg_userid.setText("");
-                                                    lg_pass.setText("");
-                                                    rg_userid.setText("");
-                                                    rg_name.setText("");
-                                                    rg_phone.setText("");
-                                                    rg_mail.setText("");
-                                                    rg_pass.setText("");
-                                                    rg_konfpass.setText("");
-                                                    Toast.makeText(mContext,
-                                                            message,
-                                                            Toast.LENGTH_SHORT).show();
-                                                }
-                                                else {
-
-                                                    Toast.makeText(mContext,
-                                                            message,
-                                                            Toast.LENGTH_SHORT).show();
-                                                }
-
-                                            }
-                                            else {
-                                                loading.dismiss();
-                                                // Tanggapan API sukses, tetapi ada kesalahan aplikasi
-                                                String errorMessage = apiResponse != null ? apiResponse.getMessage() : "Unknown error";
-                                                // Tampilkan errorMessage atau lakukan tindakan lain
-                                                Toast.makeText(mContext,errorMessage,Toast.LENGTH_SHORT).show();
-                                            }
-
-
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                        } catch (IOException e) {
-                                            throw new RuntimeException(e);
-                                        }
-                                    } else {
-
-                                        Toast.makeText(mContext,
-                                                response.message().toString(),
-                                                Toast.LENGTH_SHORT).show();
-                                        Log.i("debug", "onResponse: Tidak Berhasil");
-                                        loading.dismiss();
-                                    }
-                                }
-
-                                @Override
-                                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                                    Log.e("debug", "onFailure: ERROR > " + t.getMessage());
-                                    loading.dismiss();
-                                    Toast.makeText(mContext, t.getMessage(), Toast.LENGTH_SHORT).show();
-                                }
-                            });*/
             }
         });
 
@@ -358,111 +244,90 @@ public class MainActivity extends AppCompatActivity {
                 String serialCode = generateSerialCode();
                 if (rg_pass.getText().toString().trim().equals(rg_konfpass.getText().toString().trim())){
 
-
                     ProgressDialog loading = ProgressDialog.show(mContext, null, "Harap Tunggu...", true, false);
-
-                    //Toast.makeText(mContext, rg_mail.getText().toString(), Toast.LENGTH_SHORT).show();
 
                     dataService.registerRequest(rg_userid.getText().toString(),
                             serialCode,
                             rg_name.getText().toString(),
                             rg_mail.getText().toString(),
                             rg_phone.getText().toString(),
-                            rg_konfpass.getText().toString(),"2").enqueue(new Callback<ResponseBody>() {
-                        @Override
-                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                            if (response.isSuccessful()) {
-                                try {
-                                    String responseBodyString = response.body().string();
-                                    ApiResponse apiResponse = new Gson().fromJson(responseBodyString, ApiResponse.class);
-
-                                    if (apiResponse != null && apiResponse.isSuccess()) {
-                                        // Tanggapan sukses, lakukan sesuatu di sini
+                            rg_konfpass.getText().toString(),"2").
+                            enqueue(new Callback<ResponseBody>() {
+                                @Override
+                                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                    if (response.isSuccessful()){
                                         Log.i("debug", "onResponse: Berhasil");
                                         //Log.i("cek ",String.valueOf(response.body()));
                                         loading.dismiss();
                                         try {
-                                            boolean success = apiResponse.isSuccess();
-                                            String message = apiResponse.getMessage();
-                                            System.out.println("Success: " + success);
-                                            System.out.println("Message: " + message);
-
+                                            String ResponseString = response.body().string();
                                             // Ambil objek data dari JSON
-                                            JSONObject jsonRESULTS = new JSONObject(responseBodyString);
-                                            // Periksa apakah kunci "data" ada di dalam objek JSON
+                                            JSONObject jsonRESULTS = new JSONObject(ResponseString);
+                                            String MessageString = jsonRESULTS.get("message").toString();
+
                                             if (jsonRESULTS.has("data")) {
                                                 JSONObject dataObject = jsonRESULTS.getJSONObject("data");
+
+
+                                                System.out.println(MessageString.toString());
 
                                                 // Buat array JSON baru dan tambahkan objek data ke dalamnya
                                                 JSONArray dataArray = new JSONArray();
                                                 dataArray.put(dataObject);
 
                                                 // Output array JSON
-                                                //System.out.println(dataArray.toString());
+                                                System.out.println(dataArray.toString());
 
-                                                Log.e("cek panjang json array",String.valueOf(dataArray.length()));
-                                                if (dataArray.length()>0)
-                                                {
+                                                Log.e("panjang json array satuan", String.valueOf(dataArray.length()));
+
+                                                if (dataArray.length() > 0) {
                                                     getDataJson(dataArray);
+                                                    System.out.println(MessageString);
+
+                                                    lg_userid.setText("");
+                                                    lg_pass.setText("");
+                                                    rg_userid.setText("");
+                                                    rg_name.setText("");
+                                                    rg_phone.setText("");
+                                                    rg_mail.setText("");
+                                                    rg_pass.setText("");
+                                                    rg_konfpass.setText("");
+                                                } else {
+                                                    System.out.println(MessageString);
                                                 }
-
-                                                login_layout.setVisibility(View.VISIBLE);
-                                                register_layout.setVisibility(View.GONE);
-
-                                                lg_userid.setText("");
-                                                lg_pass.setText("");
-                                                rg_userid.setText("");
-                                                rg_name.setText("");
-                                                rg_phone.setText("");
-                                                rg_mail.setText("");
-                                                rg_pass.setText("");
-                                                rg_konfpass.setText("");
                                             }
-                                            else{
-                                                Toast.makeText(mContext,
-                                                        message,
-                                                        Toast.LENGTH_SHORT).show();
-                                            }
-
+                                            Toast.makeText(mContext,MessageString,Toast.LENGTH_SHORT).show();
 
                                         } catch (JSONException e) {
-                                            throw new RuntimeException(e);
+                                            e.printStackTrace();
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
                                         }
-                                    }
-                                    else {
-
+                                    } else {
+                                        Log.i("debug", "onResponse: Tidak Berhasil");
+                                        // Tanggapan HTTP tidak berhasil
+                                        try {
+                                            String errorBody = response.errorBody().string();
+                                            // Tangani errorBody sesuai kebutuhan
+                                            Toast.makeText(mContext,errorBody,Toast.LENGTH_SHORT).show();
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
                                         loading.dismiss();
-                                        // Tanggapan API sukses, tetapi ada kesalahan aplikasi
-                                        String errorMessage = apiResponse != null ? apiResponse.getMessage() : "Unknown error";
-                                        // Tampilkan errorMessage atau lakukan tindakan lain
-                                        Toast.makeText(mContext,errorMessage,Toast.LENGTH_SHORT).show();
+
+
                                     }
-                                } catch (IOException e) {
-                                    throw new RuntimeException(e);
                                 }
-                            }
-                            else {
-                                loading.dismiss();
-                                // Tanggapan HTTP tidak berhasil
-                                try {
-                                    String errorBody = response.errorBody().string();
-                                    // Tangani errorBody sesuai kebutuhan
-                                    Toast.makeText(mContext,errorBody,Toast.LENGTH_SHORT).show();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
+
+                                @Override
+                                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                    Log.e("debug", "onFailure: ERROR > " + t.getMessage());
+                                    loading.dismiss();
+
+                                    Toast.makeText(mContext, t.getMessage(), Toast.LENGTH_SHORT).show();
                                 }
-                            }
-                        }
+                            });
 
-                        @Override
-                        public void onFailure(Call<ResponseBody> call, Throwable t) {
-                            // Kesalahan koneksi atau respons tidak berhasil
-                            loading.dismiss();
-                            t.printStackTrace();
-
-                            Toast.makeText(mContext,t.getMessage(),Toast.LENGTH_SHORT).show();
-                        }
-                    });
 
                     /*dataService.registerRequest(rg_userid.getText().toString(),
                             serialCode,
@@ -582,6 +447,8 @@ public class MainActivity extends AppCompatActivity {
                 role = child.getString("role");
 
                 //Toast.makeText(MainActivity.this, "Berhasil Login", Toast.LENGTH_SHORT).show();
+                login_layout.setVisibility(View.VISIBLE);
+                register_layout.setVisibility(View.GONE);
             }
 
             /////////////GlobalVariables
