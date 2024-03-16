@@ -271,7 +271,38 @@ public class TransaksiTimbangActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         if (response.isSuccessful()) {
+                            loading.dismiss();
+                            mSwipeRefreshLayout.setRefreshing(false);
                             try {
+                                String ResponseString = response.body().string();
+                                // Ambil objek data dari JSON
+                                JSONObject jsonRESULTS = new JSONObject(ResponseString);
+                                String MessageString = jsonRESULTS.get("message").toString();
+
+                                if (jsonRESULTS.has("data")) {
+                                    JSONObject dataObject = jsonRESULTS.getJSONObject("data");
+
+
+                                    System.out.println(MessageString.toString());
+
+                                    // Buat array JSON baru dan tambahkan objek data ke dalamnya
+                                    JSONArray dataArray = new JSONArray();
+                                    dataArray.put(dataObject);
+
+                                    // Output array JSON
+                                    System.out.println(dataArray.toString());
+
+                                    Log.e("panjang json array satuan", String.valueOf(dataArray.length()));
+
+                                    if (dataArray.length() > 0) {
+                                        getResponJson(dataArray);
+                                        System.out.println(MessageString);
+
+                                    } else {
+                                        System.out.println(MessageString);
+                                    }
+                                }
+                                /*
                                 String responseBodyString = response.body().string();
                                 ApiResponse apiResponse = new Gson().fromJson(responseBodyString, ApiResponse.class);
 
@@ -323,13 +354,16 @@ public class TransaksiTimbangActivity extends AppCompatActivity {
                                     String errorMessage = apiResponse != null ? apiResponse.getMessage() : "Unknown error";
                                     // Tampilkan errorMessage atau lakukan tindakan lain
                                     Toast.makeText(mContext,errorMessage,Toast.LENGTH_SHORT).show();
-                                }
+                                }*/
                             } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            } catch (JSONException e) {
                                 throw new RuntimeException(e);
                             }
                         }
                         else {
                             loading.dismiss();
+                            mSwipeRefreshLayout.setRefreshing(false);
                             // Tanggapan HTTP tidak berhasil
                             try {
                                 String errorBody = response.errorBody().string();

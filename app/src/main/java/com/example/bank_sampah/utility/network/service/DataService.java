@@ -92,6 +92,7 @@ public interface DataService extends Parcelable {
 
 
     ///////////TRANSAKSI
+    /////TIMBANG
     @GET("transaksi/getprice")
     Call<ResponseBody> GetCategoryPrice();
 
@@ -104,5 +105,20 @@ public interface DataService extends Parcelable {
                                     @Field("price") String harga,
                                     @Field("userid") String userid);
 
+    @FormUrlEncoded
+    @POST("transaksi/timbang_list")
+    Call<ResponseBody> GetTimbang_byMemberCode(@Field("membercode") String membercode);
+
+
+    //////REDEEM
+    @FormUrlEncoded
+    @POST("transaksi/redeem_adm")
+    Call<ResponseBody> CreateRedeem(@Field("membercode") String membercode,
+                                     @Field("redeemamt") String redeemamt,
+                                     @Field("inuserid") String inuserid);
+
+    @FormUrlEncoded
+    @POST("transaksi/redeem_list")
+    Call<ResponseBody> GetReedem_byMemberCode(@Field("membercode") String membercode);
     ///////////TRANSAKSI
 }

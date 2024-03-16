@@ -107,6 +107,27 @@
                 android:layout_height="match_parent"
                 android:background="@drawable/menu_bk"
                 android:orientation="vertical">
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textInputCode"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    style="@style/parent">
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:id="@+id/input_name"
+                        android:imeOptions="flagNoExtractUi|actionSearch"
+                        style="@style/modifiedEditText"
+                        android:inputType="textFilter"
+                        android:maxLines="1"
+                        android:textSize="15dp"
+                        android:padding="25dp"
+                        android:layout_margin="5dp"
+                        android:hint="Tanggal DD/MM/YYYY "/>
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"

@@ -159,28 +159,37 @@ public class MasterKategoriActivity extends AppCompatActivity {
                                 String ResponseString = response.body().string();
                                 // Ambil objek data dari JSON
                                 JSONObject jsonRESULTS = new JSONObject(ResponseString);
-                                //JSONObject dataObject = jsonRESULTS.getJSONObject("data");
+
                                 String MessageString = jsonRESULTS.get("message").toString();
 
                                 if (jsonRESULTS.has("data")) {
 
-                                    // Buat array JSON baru dan tambahkan objek data ke dalamnya
+                                    Object dataObject = jsonRESULTS.get("data");
+                                    System.out.println(dataObject);
+
                                     JSONArray dataArray = new JSONArray();
-                                    dataArray.put(jsonRESULTS);
+                                    // Periksa apakah dataObject adalah objek JSON atau array JSON
+                                    if (dataObject instanceof JSONArray) {
+                                        dataArray = (JSONArray) dataObject;
+                                        // Anda dapat melanjutkan pemrosesan seperti biasa jika dataObject adalah array JSON
+                                    } else if (dataObject instanceof JSONObject) {
+                                        // Buatlah array JSON baru dan tambahkan objek JSON ke dalamnya
+                                        dataArray.put(dataObject);
+                                        // Anda dapat melanjutkan pemrosesan dengan array JSON yang baru saja dibuat
+                                    }
+
+                                    // Buat array JSON baru dan tambahkan objek data ke dalamnya
+                                    //JSONArray dataArray = (JSONArray) dataObject;
 
                                     // Output array JSON
                                     System.out.println(dataArray.toString());
 
                                     Log.e("panjang json array satuan", String.valueOf(dataArray.length()));
 
-                                    // Ambil objek pertama dari dataArray
-                                    JSONObject dataObject = dataArray.getJSONObject(0);
-                                    // Ambil array "data" dari objek tersebut
-                                    JSONArray dataArrayInside = dataObject.getJSONArray("data");
-
-                                    if (dataArrayInside.length() > 0) {
-                                        getDataJson(dataArrayInside);
+                                    if (dataArray.length() > 0) {
+                                        getDataJson(dataArray);
                                         System.out.println(MessageString);
+
                                     } else {
                                         System.out.println(MessageString);
                                     }

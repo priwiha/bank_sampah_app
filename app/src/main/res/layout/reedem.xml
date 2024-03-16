@@ -42,7 +42,7 @@
                             android:inputType="text|numberDecimal"
                             android:maxLines="1"
                             android:textSize="20dp"
-                            android:hint="Nominal Reedem"/>
+                            android:hint="Nominal Redeem"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
 

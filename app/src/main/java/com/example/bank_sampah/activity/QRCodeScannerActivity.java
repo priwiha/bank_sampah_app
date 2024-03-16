@@ -148,6 +148,36 @@ public class QRCodeScannerActivity extends AppCompatActivity {
                                 String MessageString = jsonRESULTS.get("message").toString();
 
                                 if (jsonRESULTS.has("data")) {
+
+                                    Object dataObject = jsonRESULTS.get("data");
+                                    System.out.println(dataObject);
+
+                                    JSONArray dataArray = new JSONArray();
+                                    // Periksa apakah dataObject adalah objek JSON atau array JSON
+                                    if (dataObject instanceof JSONArray) {
+                                        dataArray = (JSONArray) dataObject;
+                                        // Anda dapat melanjutkan pemrosesan seperti biasa jika dataObject adalah array JSON
+                                    } else if (dataObject instanceof JSONObject) {
+                                        // Buatlah array JSON baru dan tambahkan objek JSON ke dalamnya
+                                        dataArray.put(dataObject);
+                                        // Anda dapat melanjutkan pemrosesan dengan array JSON yang baru saja dibuat
+                                    }
+
+                                    // Output array JSON
+                                    System.out.println(dataArray.toString());
+
+                                    Log.e("panjang json array satuan", String.valueOf(dataArray.length()));
+
+                                    if (dataArray.length() > 0) {
+                                        getResponJson(dataArray);
+                                        System.out.println(MessageString);
+
+                                    } else {
+                                        System.out.println(MessageString);
+                                    }
+                                    Toast.makeText(mContext, MessageString, Toast.LENGTH_SHORT).show();
+                                }
+                                /*if (jsonRESULTS.has("data")) {
                                     JSONObject dataObject = jsonRESULTS.getJSONObject("data");
 
 
@@ -169,7 +199,7 @@ public class QRCodeScannerActivity extends AppCompatActivity {
                                     } else {
                                         System.out.println(MessageString);
                                     }
-                                }
+                                }*/
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
                             } catch (JSONException e) {

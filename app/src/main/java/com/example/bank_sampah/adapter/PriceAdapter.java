@@ -65,7 +65,11 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.ViewHolder> 
     public int getItemCount() {
         //return 0;
         //return data.size();
-        return filteredData.size();
+        if (filteredData != null) {
+            return filteredData.size();
+        } else {
+            return 0; // Or return any default size as needed
+        }
     }
 
     @Override
@@ -74,7 +78,7 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.ViewHolder> 
             @Override
             protected FilterResults performFiltering(CharSequence charSequence) {
                 String filterPattern = charSequence.toString().toLowerCase().trim();
-
+                //Toast.makeText(context,filterPattern,Toast.LENGTH_SHORT).show();
                 FilterResults results = new FilterResults();
 
                 if (filterPattern.isEmpty()) {

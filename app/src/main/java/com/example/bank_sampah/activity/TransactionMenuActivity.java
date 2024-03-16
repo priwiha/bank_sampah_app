@@ -148,9 +148,9 @@ public class TransactionMenuActivity extends AppCompatActivity {
 
         list = new ArrayList<AdminMenuModel>();
         list.add(new AdminMenuModel("1","Timbang Bobot",""));
-        list.add(new AdminMenuModel("2","Reedem",""));
+        list.add(new AdminMenuModel("2","Redeem",""));
         list.add(new AdminMenuModel("3","Histori Timbang",""));
-        list.add(new AdminMenuModel("4","Histori Reedem",""));
+        list.add(new AdminMenuModel("4","Histori Redeem",""));
         if (status=="T"){
             list.add(new AdminMenuModel("5","Update Profile",""));
         }
@@ -242,14 +242,24 @@ public class TransactionMenuActivity extends AppCompatActivity {
                                 String MessageString = jsonRESULTS.get("message").toString();
 
                                 if (jsonRESULTS.has("data")) {
-                                    JSONObject dataObject = jsonRESULTS.getJSONObject("data");
-
+                                    //JSONObject dataObject = jsonRESULTS.getJSONObject("data");
+                                    Object dataObject = jsonRESULTS.get("data");
+                                    JSONArray dataArray = new JSONArray();
+                                    // Periksa apakah dataObject adalah objek JSON atau array JSON
+                                    if (dataObject instanceof JSONArray) {
+                                        dataArray = (JSONArray) dataObject;
+                                        // Anda dapat melanjutkan pemrosesan seperti biasa jika dataObject adalah array JSON
+                                    } else if (dataObject instanceof JSONObject) {
+                                        // Buatlah array JSON baru dan tambahkan objek JSON ke dalamnya
+                                        dataArray.put(dataObject);
+                                        // Anda dapat melanjutkan pemrosesan dengan array JSON yang baru saja dibuat
+                                    }
 
                                     System.out.println(MessageString.toString());
 
                                     // Buat array JSON baru dan tambahkan objek data ke dalamnya
-                                    JSONArray dataArray = new JSONArray();
-                                    dataArray.put(dataObject);
+                                    //JSONArray dataArray = new JSONArray();
+                                    //dataArray.put(dataObject);
 
                                     // Output array JSON
                                     System.out.println(dataArray.toString());
@@ -272,6 +282,7 @@ public class TransactionMenuActivity extends AppCompatActivity {
                         }
                         else {
                             loading.dismiss();
+                            mSwipeRefreshLayout.setRefreshing(true);
                             // Tanggapan HTTP tidak berhasil
                             try {
                                 String errorBody = response.errorBody().string();

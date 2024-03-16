@@ -53,6 +53,7 @@
 
             <TextView
                 style="@style/viewParent"
+                android:id="@+id/forgot"
                 android:text="Forgot Password?"
                 android:textColor="@color/primaryTextColor"
                 android:textSize="@dimen/newsMoreTextSize"

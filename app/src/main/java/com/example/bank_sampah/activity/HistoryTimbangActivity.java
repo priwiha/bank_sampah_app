@@ -11,37 +11,43 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.bank_sampah.R;
-import com.example.bank_sampah.adapter.HistoriReedemAdapter;
 import com.example.bank_sampah.adapter.HistoriTimbangAdapter;
-import com.example.bank_sampah.adapter.MasterDataAdapter;
-import com.example.bank_sampah.model.HistoriReedemModel;
 import com.example.bank_sampah.model.HistoriTransactionModel;
 import com.example.bank_sampah.utility.GlobalData;
 import com.example.bank_sampah.utility.network.UtilsApi;
-import com.example.bank_sampah.utility.network.response.ApiResponse;
 import com.example.bank_sampah.utility.network.service.DataService;
-import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class HistoryTimbangActivity extends AppCompatActivity {
     private SwipeRefreshLayout mSwipeRefreshLayout;
@@ -50,7 +56,7 @@ public class HistoryTimbangActivity extends AppCompatActivity {
     private TextView tvdate;
 
     private TextView btn_back;
-
+    private EditText search_date;
 
     private RecyclerView rcv_timbang;
     private List<HistoriTransactionModel> list;
@@ -80,6 +86,7 @@ public class HistoryTimbangActivity extends AppCompatActivity {
         tvdate = (TextView) findViewById(R.id.tvdate);
         btn_back = (TextView) findViewById(R.id.btnBack);
         rcv_timbang = (RecyclerView) findViewById(R.id.rcv_reedem);
+        search_date = (EditText) findViewById(R.id.input_name);
 
         // Inisialisasi SwipeRefreshLayout
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
@@ -119,18 +126,7 @@ public class HistoryTimbangActivity extends AppCompatActivity {
             }
         });
 
-        list = new ArrayList<HistoriTransactionModel>();
-        for (int x = 0; x < 10; x++) {
 
-            String id = "0"+x;
-            String tgl = "01/01/2000";
-            String rupiah = x+".000,00 ";
-
-            list.add(new HistoriTransactionModel(id,tgl,rupiah));
-        }
-        adapter = new HistoriTimbangAdapter(list,this);//array dimasukkan ke adapter
-        rcv_timbang.setAdapter(adapter);
-        rcv_timbang.setLayoutManager(new LinearLayoutManager(this));
 
         btn_back.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -142,19 +138,7 @@ public class HistoryTimbangActivity extends AppCompatActivity {
         });
 
 
-        adapter.setOnItemClickListener(new HistoriTimbangAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(View itemView, int position) {
-                Toast.makeText(HistoryTimbangActivity.this,list.get(position).getIdtrx().toString(),Toast.LENGTH_SHORT).show();
-                Intent i = new Intent(HistoryTimbangActivity.this, UpdateHistoryTimbangActivity.class);
-                i.putExtra("add_or_update", "update");
-                i.putExtra("tgl", list.get(position).getTgl().toString());
-                i.putExtra("ket", list.get(position).getKet().toString());
-                i.putExtra("id", list.get(position).getIdtrx().toString());
-                startActivity(i);
-                finish();
-            }
-        });
+
 
     }
 
@@ -169,65 +153,52 @@ public class HistoryTimbangActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         if (response.isSuccessful()) {
+                            //remark karena masih ada proses
+                            //loading.dismiss();
                             try {
-                                String responseBodyString = response.body().string();
-                                ApiResponse apiResponse = new Gson().fromJson(responseBodyString, ApiResponse.class);
+                                String ResponseString = response.body().string();
+                                // Ambil objek data dari JSON
+                                JSONObject jsonRESULTS = new JSONObject(ResponseString);
+                                String MessageString = jsonRESULTS.get("message").toString();
 
-                                if (apiResponse != null && apiResponse.isSuccess()) {
-                                    // Tanggapan sukses, lakukan sesuatu di sini
-                                    Log.i("debug", "onResponse: Berhasil");
-                                    //Log.i("cek ",String.valueOf(response.body()));
-                                    loading.dismiss();
-                                    try {
-                                        boolean success = apiResponse.isSuccess();
-                                        String message = apiResponse.getMessage();
-                                        System.out.println("Success: " + success);
-                                        System.out.println("Message: " + message);
+                                if (jsonRESULTS.has("data")) {
+                                    Object dataObject = jsonRESULTS.get("data");
+                                    System.out.println(MessageString.toString());
 
-                                        // Ambil objek data dari JSON
-                                        JSONObject jsonRESULTS = new JSONObject(responseBodyString);
-                                        // Periksa apakah kunci "data" ada di dalam objek JSON
-                                        if (jsonRESULTS.has("data")) {
-                                            JSONObject dataObject = jsonRESULTS.getJSONObject("data");
+                                    JSONArray dataArray = new JSONArray();
+                                    // Periksa apakah dataObject adalah objek JSON atau array JSON
+                                    if (dataObject instanceof JSONArray) {
+                                        dataArray = (JSONArray) dataObject;
+                                        // Anda dapat melanjutkan pemrosesan seperti biasa jika dataObject adalah array JSON
+                                    } else if (dataObject instanceof JSONObject) {
+                                        // Buatlah array JSON baru dan tambahkan objek JSON ke dalamnya
+                                        dataArray.put(dataObject);
+                                        // Anda dapat melanjutkan pemrosesan dengan array JSON yang baru saja dibuat
+                                    }
 
-                                            // Buat array JSON baru dan tambahkan objek data ke dalamnya
-                                            JSONArray dataArray = new JSONArray();
-                                            dataArray.put(dataObject);
+                                    // Output array JSON
+                                    System.out.println(dataArray.toString());
 
-                                            // Output array JSON
-                                            System.out.println(dataArray.toString());
+                                    Log.e("panjang json array satuan", String.valueOf(dataArray.length()));
 
-                                            Log.e("panjang json array satuan",String.valueOf(dataArray.length()));
-                                            if (dataArray.length()>0)
-                                            {
-                                                getResponJson(dataArray);
-                                            }
-                                        }
-                                        else{
-                                            Toast.makeText(mContext,
-                                                    message,
-                                                    Toast.LENGTH_SHORT).show();
-                                        }
+                                    if (dataArray.length() > 0) {
+                                        getResponJson(dataArray,mContext,loading);
+                                        System.out.println(MessageString);
 
-
-                                    } catch (JSONException e) {
-                                        throw new RuntimeException(e);
+                                    } else {
+                                        System.out.println(MessageString);
                                     }
                                 }
-                                else {
 
-                                    loading.dismiss();
-                                    // Tanggapan API sukses, tetapi ada kesalahan aplikasi
-                                    String errorMessage = apiResponse != null ? apiResponse.getMessage() : "Unknown error";
-                                    // Tampilkan errorMessage atau lakukan tindakan lain
-                                    Toast.makeText(mContext,errorMessage,Toast.LENGTH_SHORT).show();
-                                }
                             } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            } catch (JSONException e) {
                                 throw new RuntimeException(e);
                             }
                         }
                         else {
                             loading.dismiss();
+                            mSwipeRefreshLayout.setRefreshing(false);
                             // Tanggapan HTTP tidak berhasil
                             try {
                                 String errorBody = response.errorBody().string();
@@ -249,7 +220,7 @@ public class HistoryTimbangActivity extends AppCompatActivity {
                 });
     }
 
-    private void getResponJson(JSONArray dataArray) {
+    private void getResponJson(JSONArray dataArray,Context mContext,ProgressDialog loading) {
         if (dataArray.length() > 0) {
             String amt="";
             String nama="";
@@ -271,7 +242,205 @@ public class HistoryTimbangActivity extends AppCompatActivity {
             //tvamt.setText(amt);
             tvNama.setText(nama+" ("+id_member+")");
             tvtelp.setText("Phone : "+telp);
+
+            getHistoryTimbang(id_member,mContext,loading);
         }
+    }
+
+    private void getHistoryTimbang(String id_member,Context mContext,ProgressDialog loading) {
+        dataService.GetTimbang_byMemberCode(id_member).
+                enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        if (response.isSuccessful()) {
+                            loading.dismiss();
+                            mSwipeRefreshLayout.setRefreshing(false);
+                            try {
+                                String ResponseString = response.body().string();
+                                // Ambil objek data dari JSON
+                                JSONObject jsonRESULTS = new JSONObject(ResponseString);
+                                String MessageString = jsonRESULTS.get("message").toString();
+
+                                if (jsonRESULTS.has("data")) {
+                                    Object dataObject = jsonRESULTS.get("data");
+                                    System.out.println(MessageString.toString());
+
+                                    JSONArray dataArray = new JSONArray();
+                                    // Periksa apakah dataObject adalah objek JSON atau array JSON
+                                    if (dataObject instanceof JSONArray) {
+                                        dataArray = (JSONArray) dataObject;
+                                        // Anda dapat melanjutkan pemrosesan seperti biasa jika dataObject adalah array JSON
+                                    } else if (dataObject instanceof JSONObject) {
+                                        // Buatlah array JSON baru dan tambahkan objek JSON ke dalamnya
+                                        dataArray.put(dataObject);
+                                        // Anda dapat melanjutkan pemrosesan dengan array JSON yang baru saja dibuat
+                                    }
+
+                                    // Output array JSON
+                                    System.out.println(dataArray.toString());
+
+                                    Log.e("panjang json array satuan", String.valueOf(dataArray.length()));
+
+                                    if (dataArray.length() > 0) {
+                                        getResponListTimbangJson(dataArray);
+                                        System.out.println(MessageString);
+
+                                    } else {
+                                        System.out.println(MessageString);
+                                    }
+                                    Toast.makeText(mContext,MessageString,Toast.LENGTH_SHORT).show();
+                                }
+
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            } catch (JSONException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                        else {
+                            loading.dismiss();
+                            mSwipeRefreshLayout.setRefreshing(false);
+                            // Tanggapan HTTP tidak berhasil
+                            try {
+                                String errorBody = response.errorBody().string();
+                                // Tangani errorBody sesuai kebutuhan
+                                Toast.makeText(mContext,errorBody,Toast.LENGTH_SHORT).show();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Log.e("debug", "onFailure: ERROR > " + t.getMessage());
+                        loading.dismiss();
+                        mSwipeRefreshLayout.setRefreshing(false);
+                        Toast.makeText(mContext,t.getMessage(),Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void getResponListTimbangJson(JSONArray dataArray) {
+        String id = "";
+        String tgl = "";
+        String qty = "";
+        String satuan = "";
+        String total = "";
+
+        list = new ArrayList<HistoriTransactionModel>();
+        if (dataArray.length() > 0) {
+            try {
+
+                for (int i = 0; i < dataArray.length(); i++)
+                {
+                    JSONObject jo2 = dataArray.getJSONObject(i);
+                    id     = jo2.getString("idgrb");
+                    qty    = jo2.getString("qty");
+                    tgl    = jo2.getString("date");
+                    satuan = jo2.getString("iduom");
+                    total  = jo2.getString("pricetot");
+
+
+                    // Mengonversi string menjadi double
+                    double angka = Double.parseDouble(jo2.getString("pricetot"));
+                    // Membuat format rupiah
+                    NumberFormat formatRupiah = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
+                    // Menggunakan format rupiah untuk mengonversi angka menjadi string dengan separator
+                    String angkaFormatted = formatRupiah.format(angka);
+
+                    // Format tanggal
+                    SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd");
+                    SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yyyy");
+
+                    try {
+                        // Parsing string tanggal menjadi objek Date
+                        Date date = inputFormat.parse(tgl);
+                        // Mengonversi objek Date menjadi string dengan format yang diinginkan
+                        String formattedDate = outputFormat.format(date);
+                        // Output hasilnya
+                        System.out.println("Tanggal dalam format baru: " + formattedDate);
+
+                        list.add(new HistoriTransactionModel(id,formattedDate,angkaFormatted));
+
+                    } catch (ParseException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
+
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        adapter = new HistoriTimbangAdapter(list,this);//array dimasukkan ke adapter
+        rcv_timbang.setAdapter(adapter);
+        rcv_timbang.setLayoutManager(new LinearLayoutManager(this));
+        /*adapter.setOnItemClickListener(new HistoriTimbangAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View itemView, int position) {
+                Toast.makeText(HistoryTimbangActivity.this,list.get(position).getIdtrx().toString(),Toast.LENGTH_SHORT).show();
+                Intent i = new Intent(HistoryTimbangActivity.this, UpdateHistoryTimbangActivity.class);
+                i.putExtra("add_or_update", "update");
+                i.putExtra("tgl", list.get(position).getTgl().toString());
+                i.putExtra("ket", list.get(position).getKet().toString());
+                i.putExtra("id", list.get(position).getIdtrx().toString());
+                startActivity(i);
+                finish();
+            }
+        });*/
+
+        // Tambahkan OnClickListener ke EditText untuk memunculkan DatePickerDialog
+        search_date.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showDatePickerDialog();
+            }
+        });
+
+        // Tambahkan TextWatcher ke EditText untuk filter saat teks berubah
+        search_date.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                // Not needed for this example
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                // Invoke the filter method when text changes
+                adapter.getFilter().filter(charSequence);
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                // Not needed for this example
+            }
+        });
+
+
+
+    }
+
+    private void showDatePickerDialog() {
+        final Calendar currentDate = Calendar.getInstance();
+        int year = currentDate.get(Calendar.YEAR);
+        int month = currentDate.get(Calendar.MONTH);
+        int day = currentDate.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker datePicker, int selectedYear, int selectedMonth, int selectedDay) {
+                // Handle date selection and update EditText
+                Calendar selectedDate = Calendar.getInstance();
+                selectedDate.set(selectedYear, selectedMonth, selectedDay);
+
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                search_date.setText(sdf.format(selectedDate.getTime()));
+            }
+        }, year, month, day);
+
+        datePickerDialog.show();
     }
 
     public void onBackPressed() {

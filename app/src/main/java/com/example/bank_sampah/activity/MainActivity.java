@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.bank_sampah.R;
@@ -53,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
     private Button lg_register_btn;
     private EditText lg_userid;
     private EditText lg_pass;
+    private TextView forgot_pass;
 
 
     //button layout register
@@ -89,6 +91,7 @@ public class MainActivity extends AppCompatActivity {
         lg_register_btn = (Button) findViewById(R.id.RegisterButtonLg);
         lg_userid = (EditText) findViewById(R.id.editTextUserid);
         lg_pass = (EditText) findViewById(R.id.editTextPassword);
+        forgot_pass = (TextView) findViewById(R.id.forgot);
 
         //button layout login
         rg_register_btn = (Button) findViewById(R.id.RegisterButtonRg);
@@ -152,6 +155,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        forgot_pass.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(MainActivity.this, QRScannerActivity2.class/*QRCodeScannerActivity.class*/);
+                startActivity(i);
+            }
+        });
+
 
         lg_login_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -174,14 +185,19 @@ public class MainActivity extends AppCompatActivity {
                                     String MessageString = jsonRESULTS.get("message").toString();
 
                                     if (jsonRESULTS.has("data")) {
-                                        JSONObject dataObject = jsonRESULTS.getJSONObject("data");
-
-
+                                        Object dataObject = jsonRESULTS.get("data");
                                         System.out.println(MessageString.toString());
 
-                                        // Buat array JSON baru dan tambahkan objek data ke dalamnya
                                         JSONArray dataArray = new JSONArray();
-                                        dataArray.put(dataObject);
+                                        // Periksa apakah dataObject adalah objek JSON atau array JSON
+                                        if (dataObject instanceof JSONArray) {
+                                            dataArray = (JSONArray) dataObject;
+                                            // Anda dapat melanjutkan pemrosesan seperti biasa jika dataObject adalah array JSON
+                                        } else if (dataObject instanceof JSONObject) {
+                                            // Buatlah array JSON baru dan tambahkan objek JSON ke dalamnya
+                                            dataArray.put(dataObject);
+                                            // Anda dapat melanjutkan pemrosesan dengan array JSON yang baru saja dibuat
+                                        }
 
                                         // Output array JSON
                                         System.out.println(dataArray.toString());
@@ -266,14 +282,19 @@ public class MainActivity extends AppCompatActivity {
                                             String MessageString = jsonRESULTS.get("message").toString();
 
                                             if (jsonRESULTS.has("data")) {
-                                                JSONObject dataObject = jsonRESULTS.getJSONObject("data");
-
-
+                                                Object dataObject = jsonRESULTS.get("data");
                                                 System.out.println(MessageString.toString());
 
-                                                // Buat array JSON baru dan tambahkan objek data ke dalamnya
                                                 JSONArray dataArray = new JSONArray();
-                                                dataArray.put(dataObject);
+                                                // Periksa apakah dataObject adalah objek JSON atau array JSON
+                                                if (dataObject instanceof JSONArray) {
+                                                    dataArray = (JSONArray) dataObject;
+                                                    // Anda dapat melanjutkan pemrosesan seperti biasa jika dataObject adalah array JSON
+                                                } else if (dataObject instanceof JSONObject) {
+                                                    // Buatlah array JSON baru dan tambahkan objek JSON ke dalamnya
+                                                    dataArray.put(dataObject);
+                                                    // Anda dapat melanjutkan pemrosesan dengan array JSON yang baru saja dibuat
+                                                }
 
                                                 // Output array JSON
                                                 System.out.println(dataArray.toString());
@@ -292,6 +313,9 @@ public class MainActivity extends AppCompatActivity {
                                                     rg_mail.setText("");
                                                     rg_pass.setText("");
                                                     rg_konfpass.setText("");
+
+                                                    login_layout.setVisibility(View.VISIBLE);
+                                                    register_layout.setVisibility(View.GONE);
                                                 } else {
                                                     System.out.println(MessageString);
                                                 }
