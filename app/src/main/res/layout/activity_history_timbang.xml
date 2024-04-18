@@ -137,6 +137,8 @@
                     android:id="@+id/member_chprofile">
 
                     <include layout="@layout/list_histori_reedem"/>
+                    <!--<include layout="@layout/list_kategori" />-->
+
                 </LinearLayout>
 
             </LinearLayout>

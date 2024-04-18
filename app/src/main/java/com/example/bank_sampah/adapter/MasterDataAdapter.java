@@ -44,7 +44,14 @@ public class MasterDataAdapter  extends RecyclerView.Adapter<MasterDataAdapter.V
     public void onBindViewHolder(@NonNull MasterDataAdapter.ViewHolder holder, int position) {
         MasterDataModel temp = data.get(position);
         holder.id.setText(temp.getName());
+        holder.field1.setText(temp.getSatuan_nm());
         holder.nama.setText("Satuan per "+temp.getSatuan_nm());
+        holder.field2.setText(temp.getName());
+
+        //if (temp.getType().equals("kategori")) {
+        holder.field1.setVisibility(View.GONE);
+        holder.field2.setVisibility(View.GONE);
+        //}
     }
 
     @Override
@@ -88,13 +95,18 @@ public class MasterDataAdapter  extends RecyclerView.Adapter<MasterDataAdapter.V
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         private TextView id;
+        private TextView field1;
         private TextView nama;
+        private TextView field2;
 
         public ViewHolder(@NonNull View itemView, Context context) {
             super(itemView);
 
             id = (TextView) itemView.findViewById(R.id.txtIdMaster);
             nama = (TextView) itemView.findViewById(R.id.txtNamaMaster);
+            field1 = (TextView) itemView.findViewById(R.id.txtfield1);
+            field2 = (TextView) itemView.findViewById(R.id.txtfield2);
+
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

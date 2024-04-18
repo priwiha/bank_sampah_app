@@ -1,5 +1,6 @@
 package com.example.bank_sampah.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,7 +24,7 @@ import java.util.List;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.ViewHolder> implements Filterable {
+public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.ViewHolder> /*implements Filterable*/ {
 
     private List<MasterPriceModel> data;
     private List<MasterPriceModel> filteredData;
@@ -45,6 +46,7 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.ViewHolder> 
         return new PriceAdapter.ViewHolder(item,context);//1:1 adapter:activity
     }
 
+    @SuppressLint("ResourceAsColor")
     @Override
     public void onBindViewHolder(@NonNull PriceAdapter.ViewHolder holder, int position) {
         MasterPriceModel temp = data.get(position);
@@ -54,9 +56,12 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.ViewHolder> 
         }
         else {
             status="Non-Aktif";
+            holder.field1.setTextColor(R.color.softmaroon);
         }
-        holder.id.setText(temp.getPrice()+"/"+temp.getSatuan());
-        holder.nama.setText(temp.getTglins()+" ("+status+") "+temp.getKategori());
+        holder.id.setText(temp.getTglins());
+        holder.nama.setText(temp.getKategori());
+        holder.field1.setText(status);
+        holder.field2.setText(temp.getPrice()+"/"+temp.getSatuan());
 
 
     }
@@ -64,15 +69,15 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.ViewHolder> 
     @Override
     public int getItemCount() {
         //return 0;
-        //return data.size();
-        if (filteredData != null) {
+        return data.size();
+        /*if (filteredData != null) {
             return filteredData.size();
         } else {
             return 0; // Or return any default size as needed
-        }
+        }*/
     }
 
-    @Override
+    /*@Override
     public Filter getFilter() {
         return new Filter() {
             @Override
@@ -86,23 +91,11 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.ViewHolder> 
                 } else {
                     List<MasterPriceModel> filteredList = new ArrayList<>();
                     for (MasterPriceModel item : data) {
-                        String formattedDate = null;
-                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-                            String dateString=item.getTglins();
-                            // Konversi string menjadi objek LocalDate
-                            LocalDate date = LocalDate.parse(dateString, dateFormatter);
-
-                            // Format LocalDate menjadi string dengan pola yang diinginkan
-                            formattedDate = date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-
-                        }
-
-                        if (formattedDate.contains(filterPattern)) {
-
+                        if (item.getKategori().toLowerCase().contains(filterPattern)) {
                             filteredList.add(item);
                         }
                     }
+
                     results.values = filteredList;
                     //return results;
                 }
@@ -116,17 +109,21 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.ViewHolder> 
                 notifyDataSetChanged();
             }
         };
-    }
+    }*/
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         private TextView id;
         private TextView nama;
+        private TextView field1;
+        private TextView field2;
 
         public ViewHolder(@NonNull View itemView, Context context) {
             super(itemView);
 
             id = (TextView) itemView.findViewById(R.id.txtIdMaster);
             nama = (TextView) itemView.findViewById(R.id.txtNamaMaster);
+            field1 = (TextView) itemView.findViewById(R.id.txtfield1);
+            field2 = (TextView) itemView.findViewById(R.id.txtfield2);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

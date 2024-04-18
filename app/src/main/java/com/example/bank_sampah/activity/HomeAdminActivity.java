@@ -165,7 +165,7 @@ public class HomeAdminActivity extends AppCompatActivity {
         btn_scan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(HomeAdminActivity.this,QRCodeScannerActivity.class);
+                Intent i = new Intent(HomeAdminActivity.this,QRScannerActivity2.class);
                 startActivity(i);
             }
         });

@@ -1,7 +1,6 @@
 package com.example.bank_sampah.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -13,10 +12,8 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -35,9 +32,9 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
-public class ApprovalOrUpdateMemberActivity extends AppCompatActivity {
-    //private SwipeRefreshLayout mSwipeRefreshLayout;
+public class ResetPassActivity extends AppCompatActivity {
     private TextView back;
     private TextView save;
     private TextView generate;
@@ -49,9 +46,11 @@ public class ApprovalOrUpdateMemberActivity extends AppCompatActivity {
     private EditText pass;
     private Spinner status;
 
+
     private String vtipe ="";
     private String vid ="";
     private String vuser ="";
+    private String vuserid ="";
     private String vnama="";
     private String vmail="";
     private String vphone="";
@@ -64,7 +63,7 @@ public class ApprovalOrUpdateMemberActivity extends AppCompatActivity {
 
     /////retrofit2
     private DataService dataService;
-    private static final String TAG = ApprovalOrUpdateMemberActivity.class.getSimpleName();
+    private static final String TAG = ResetPassActivity.class.getSimpleName();
     /////retrofit2
 
     boolean doubleBackToExitPressedOnce = false;
@@ -75,10 +74,11 @@ public class ApprovalOrUpdateMemberActivity extends AppCompatActivity {
     String userid = dataList.get(0);
     //global var
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_approval_or_update_member);
+        setContentView(R.layout.activity_reset_pass);
 
         back = (TextView) findViewById(R.id.btnBack);
         save = (TextView) findViewById(R.id.save_approve_member);
@@ -91,12 +91,12 @@ public class ApprovalOrUpdateMemberActivity extends AppCompatActivity {
         pass= (EditText) findViewById(R.id.et_pass_member);
         status= (Spinner) findViewById(R.id.spn_status);
 
-        pass.setVisibility(View.GONE);
-        generate.setVisibility(View.GONE);
+        mail.setVisibility(View.GONE);
+        phone.setVisibility(View.GONE);
+        status.setVisibility(View.GONE);
 
+        pass.setEnabled(false);
 
-        // Inisialisasi SwipeRefreshLayout
-        //mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
 
         /////retrofit2
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
@@ -105,12 +105,9 @@ public class ApprovalOrUpdateMemberActivity extends AppCompatActivity {
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
         httpClient.addInterceptor(loggingInterceptor);
 
-        Context mContext = ApprovalOrUpdateMemberActivity.this;
+        Context mContext = ResetPassActivity.this;
         dataService = UtilsApi.getAPIService();
         /////retrofit2
-
-
-
 
         list_status_name = new ArrayList<>();
         list_status_id = new ArrayList<>();
@@ -121,16 +118,9 @@ public class ApprovalOrUpdateMemberActivity extends AppCompatActivity {
         list_status_id.add("Y");
         list_status_id.add("T");
 
-
-        adapter_status= new ArrayAdapter<String>(ApprovalOrUpdateMemberActivity.this,
-                android.R.layout.simple_spinner_item, list_status_name);
-        adapter_status.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        status.setAdapter(adapter_status);
-
         Intent intent = getIntent();
         if (intent.hasExtra("add_or_update")) {
             vtipe       = intent.getStringExtra("add_or_update");
-
 
             if (!vtipe.equals("add"))
             {
@@ -172,15 +162,13 @@ public class ApprovalOrUpdateMemberActivity extends AppCompatActivity {
                 //status.setText(vstatus);
 
             }
-
         }
-
 
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (vtipe.equals("update1")) {
-                    Intent i = new Intent(ApprovalOrUpdateMemberActivity.this, MasterMemberActivity.class);
+                    Intent i = new Intent(ResetPassActivity.this, MasterMemberActivity.class);
                     startActivity(i);
                     finish();
                 }
@@ -190,36 +178,37 @@ public class ApprovalOrUpdateMemberActivity extends AppCompatActivity {
             }
         });
 
-        status.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+        generate.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            public void onClick(View view) {
+                // Panjang string yang diinginkan
+                int length = 6;
 
-                status_id = list_status_id.get(position);
+                // Generate random string
+                String randomString = generateRandomString(length);
 
-            }
+                // Tampilkan hasil
+                System.out.println("Random String: " + randomString +" userid "+vuser);
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
 
+                pass.setText(randomString);
             }
         });
+
 
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                updateData(userid,vuser,nama.getText().toString(),
-                        mail.getText().toString(),phone.getText().toString(),status_id,mContext);
+                reset_pass(pass.getText().toString(),vuser,mContext);
             }
         });
-
     }
 
-    private void updateData(String userid, String id, String nama, String mail, String phone, String status_id, Context mContext) {
+    private void reset_pass(String randomString, String vuserid, Context mContext) {
         ProgressDialog loading = ProgressDialog.show(mContext, null, "Harap Tunggu...", true, false);
-
-        //Toast.makeText(mContext, price, Toast.LENGTH_SHORT).show();
-
-        dataService.MemberUpdate(id,nama,phone,mail,userid,status_id).
+        Log.e("cek param",randomString+"  "+vuserid);
+        dataService.ResetPass(randomString,vuserid).
                 enqueue(new Callback<ResponseBody>() {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -228,7 +217,7 @@ public class ApprovalOrUpdateMemberActivity extends AppCompatActivity {
                             //Log.i("cek ",String.valueOf(response.body()));
                             loading.dismiss();
                             try {
-
+                                finish();
                                 // Ambil objek data dari JSON
                                 JSONObject jsonRESULTS = new JSONObject(response.body().string());
                                 if (jsonRESULTS.has("data")) {
@@ -272,44 +261,37 @@ public class ApprovalOrUpdateMemberActivity extends AppCompatActivity {
     }
 
     private void getResponJson(JSONArray dataArray) {
-        if (dataArray.length() > 0) {
-            String idmember="";
-            //String price="";
-            try{
-                for (int x = 0; x < dataArray.length(); x++)
-                {
-                    JSONObject child = dataArray.getJSONObject(x);
-                    idmember = child.getString("membercode");
-                    //price = child.getString("price");
-
-
-                }
-                Log.e( "id member"+idmember," berhasil diproses harga ");
-
-                Intent i = new Intent(ApprovalOrUpdateMemberActivity.this, MasterMemberActivity.class);
-                startActivity(i);
-                finish();
-            }catch (JSONException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        //Intent i = new Intent(ResetPassActivity.this, MasterMemberActivity.class);
+        //startActivity(i);
+        finish();
     }
 
-    public void onBackPressed() {
-        if (doubleBackToExitPressedOnce) {
-            super.onBackPressed();
-            return;
+    // Method untuk generate random string
+    public static String generateRandomString(int length) {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        String characters2 = "!@#$&*";
+        StringBuilder sb = new StringBuilder(length);
+        Random random = new Random();
+
+        char symbol = characters2.charAt(random.nextInt(6));
+
+        // Tambahkan simbol ke string
+        sb.append(symbol);
+
+        for (int i = 0; i < length-1; i++) {
+            int index = random.nextInt(characters.length());
+            sb.append(characters.charAt(index));
         }
 
-        this.doubleBackToExitPressedOnce = true;
-        Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+        // Acak ulang string agar simbol tidak selalu pada posisi awal
+        for (int i = 0; i < length; i++) {
+            int index1 = random.nextInt(length);
+            int index2 = random.nextInt(length);
+            char temp = sb.charAt(index1);
+            sb.setCharAt(index1, sb.charAt(index2));
+            sb.setCharAt(index2, temp);
+        }
 
-        new Handler().postDelayed(new Runnable() {
-
-            @Override
-            public void run() {
-                doubleBackToExitPressedOnce=false;
-            }
-        }, 2000);
+        return sb.toString();
     }
 }

@@ -18,12 +18,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.bank_sampah.R;
 import com.example.bank_sampah.adapter.TransactionMenuAdapter;
 import com.example.bank_sampah.model.AdminMenuModel;
+import com.example.bank_sampah.utility.ApprovalDialog;
 import com.example.bank_sampah.utility.GlobalData;
 import com.example.bank_sampah.utility.network.UtilsApi;
 import com.example.bank_sampah.utility.network.response.ApiResponse;
@@ -53,7 +55,14 @@ public class TransactionMenuActivity extends AppCompatActivity {
     private TextView tvtelp;
     private TextView tvdate;
 
-    private String id_member,status,amt,nama,telp,mail,user;
+    private LinearLayout menu;
+    private LinearLayout ltapproval;
+    private LinearLayout ltsaldo;
+    private LinearLayout ltnonaktif;
+
+    private TextView tv_btnappr;
+
+    private String status,amt,nama,telp,mail,user,aktif;
 
     private RecyclerView rcv_menu;
     private List<AdminMenuModel> list;
@@ -68,7 +77,8 @@ public class TransactionMenuActivity extends AppCompatActivity {
     //global var
     GlobalData globalData = GlobalData.getInstance();
     ArrayList<String> dataList = globalData.getDataList();
-    String userid = dataList.get(0);
+    String userid = dataList.get(0);//userid login
+    String id_member = "";
     //global var
 
 
@@ -83,6 +93,12 @@ public class TransactionMenuActivity extends AppCompatActivity {
         tvtelp = (TextView) findViewById(R.id.tvtelp);
         tvdate = (TextView) findViewById(R.id.tvdate);
         rcv_menu = (RecyclerView) findViewById(R.id.rcv_menu);
+
+        menu=  (LinearLayout)  findViewById(R.id.menu);
+        ltapproval= (LinearLayout)  findViewById(R.id.ltapproval);
+        ltsaldo= (LinearLayout)  findViewById(R.id.ltsaldo);
+        tv_btnappr= (TextView)  findViewById(R.id.tv_btnappr);
+        ltnonaktif= (LinearLayout)  findViewById(R.id.lt_nonaktif);
 
         // Inisialisasi SwipeRefreshLayout
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
@@ -132,6 +148,7 @@ public class TransactionMenuActivity extends AppCompatActivity {
 
         }
 
+
         initComponents(mContext,id_member);
 
 
@@ -151,10 +168,10 @@ public class TransactionMenuActivity extends AppCompatActivity {
         list.add(new AdminMenuModel("2","Redeem",""));
         list.add(new AdminMenuModel("3","Histori Timbang",""));
         list.add(new AdminMenuModel("4","Histori Redeem",""));
-        if (status=="T"){
-            list.add(new AdminMenuModel("5","Update Profile",""));
-        }
-        //list.add(new AdminMenuModel("5","Back",""));
+        //if (status=="T"){
+        list.add(new AdminMenuModel("5","Ubah Data",""));
+        //}
+        list.add(new AdminMenuModel("6","Reset Password",""));
         adapter = new TransactionMenuAdapter(list,this);//array dimasukkan ke adapter
         rcv_menu.setAdapter(adapter);
         rcv_menu.setLayoutManager(new GridLayoutManager(this,3));
@@ -164,9 +181,11 @@ public class TransactionMenuActivity extends AppCompatActivity {
         btn_back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (id_member!=""){
-                    globalData.removeData(id_member);
+                //if (dataList.size()>1){
+                for (int x = 0; x < dataList.size(); x++) {
+                    globalData.removeData(dataList.get(x));
                 }
+                //}
 
                 Intent i = new Intent(TransactionMenuActivity.this, HomeAdminActivity.class);
                 startActivity(i);
@@ -216,10 +235,126 @@ public class TransactionMenuActivity extends AppCompatActivity {
                     i.putExtra("mail", mail);
                     i.putExtra("status", status);
                     startActivity(i);
-                    finish();
+                    //finish();
+                }else if (list.get(position).getIdmenu().toString().equals("6")){
+                    Intent i = new Intent(TransactionMenuActivity.this, ResetPassActivity.class);
+                    i.putExtra("add_or_update", "update");
+                    i.putExtra("id", id_member);
+                    i.putExtra("username", user);
+                    i.putExtra("name", nama);
+                    i.putExtra("phone", telp);
+                    i.putExtra("mail", mail);
+                    i.putExtra("status", status);
+                    startActivity(i);
+                    //finish();
                 }
             }
         });
+
+        tv_btnappr.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ApprovalDialog alert = new ApprovalDialog();
+                alert.showDialog(TransactionMenuActivity.this,"User");
+
+            }
+        });
+
+        ltnonaktif.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                nonaktif_member(id_member,userid,mContext);
+            }
+        });
+    }
+
+    private void nonaktif_member(String id_member, String userid, Context mContext) {
+        ProgressDialog loading = ProgressDialog.show(mContext, null, "Harap Tunggu...", true, false);
+
+        dataService.MemberActivate(id_member,userid).
+                enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        if (response.isSuccessful()) {
+                            loading.dismiss();
+                            //mSwipeRefreshLayout.setRefreshing(false);
+                            try {
+                                String ResponseString = response.body().string();
+                                // Ambil objek data dari JSON
+                                JSONObject jsonRESULTS = new JSONObject(ResponseString);
+                                String MessageString = jsonRESULTS.get("message").toString();
+
+                                if (jsonRESULTS.has("data")) {
+                                    //JSONObject dataObject = jsonRESULTS.getJSONObject("data");
+                                    Object dataObject = jsonRESULTS.get("data");
+                                    JSONArray dataArray = new JSONArray();
+                                    // Periksa apakah dataObject adalah objek JSON atau array JSON
+                                    if (dataObject instanceof JSONArray) {
+                                        dataArray = (JSONArray) dataObject;
+                                        // Anda dapat melanjutkan pemrosesan seperti biasa jika dataObject adalah array JSON
+                                    } else if (dataObject instanceof JSONObject) {
+                                        // Buatlah array JSON baru dan tambahkan objek JSON ke dalamnya
+                                        dataArray.put(dataObject);
+                                        // Anda dapat melanjutkan pemrosesan dengan array JSON yang baru saja dibuat
+                                    }
+
+                                    System.out.println(MessageString.toString());
+
+                                    // Buat array JSON baru dan tambahkan objek data ke dalamnya
+                                    //JSONArray dataArray = new JSONArray();
+                                    //dataArray.put(dataObject);
+
+                                    // Output array JSON
+                                    System.out.println(dataArray.toString());
+
+                                    Log.e("panjang json array satuan", String.valueOf(dataArray.length()));
+
+                                    if (dataArray.length() > 0) {
+                                        getResponJson2(dataArray,mContext);
+                                        System.out.println(MessageString);
+
+                                    } else {
+                                        System.out.println(MessageString);
+                                    }
+                                }
+                            } catch (JSONException e) {
+                                throw new RuntimeException(e);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                        else {
+                            loading.dismiss();
+                            //mSwipeRefreshLayout.setRefreshing(true);
+                            // Tanggapan HTTP tidak berhasil
+                            try {
+                                String errorBody = response.errorBody().string();
+                                // Tangani errorBody sesuai kebutuhan
+                                Toast.makeText(mContext,errorBody,Toast.LENGTH_SHORT).show();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Log.e("debug", "onFailure: ERROR > " + t.getMessage());
+                        loading.dismiss();
+                        //mSwipeRefreshLayout.setRefreshing(false);
+                        Toast.makeText(mContext,t.getMessage(),Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void getResponJson2(JSONArray dataArray, Context mContext) {
+        TransactionMenuActivity.refreshActivity(mContext);
+    }
+
+    public static void refreshActivity(Context context) {
+        Intent intent = new Intent(context, TransactionMenuActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
     }
 
     public void initComponents(Context mContext, String id_member) {
@@ -368,7 +503,29 @@ public class TransactionMenuActivity extends AppCompatActivity {
             tvamt.setText(angkaFormatted);
             tvNama.setText(nama+" ("+id_member+")");
             tvtelp.setText("Phone : "+telp);
+
+            //Toast.makeText(TransactionMenuActivity.this,status,Toast.LENGTH_SHORT).show();
+
+            if (status.equals("Y"))
+            {
+                menu.setVisibility(View.VISIBLE);
+                ltsaldo.setVisibility(View.VISIBLE);
+                ltnonaktif.setVisibility(View.GONE);
+
+                ltapproval.setVisibility(View.GONE);
+                tv_btnappr.setVisibility(View.GONE);
+            }
+            else{
+                menu.setVisibility(View.GONE);
+                ltsaldo.setVisibility(View.GONE);
+                ltnonaktif.setVisibility(View.GONE);
+
+                ltapproval.setVisibility(View.VISIBLE);
+                tv_btnappr.setVisibility(View.VISIBLE);
+            }
         }
+
+
     }
 
     public void onBackPressed() {

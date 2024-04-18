@@ -100,7 +100,7 @@
                             android:layout_gravity="center"
                             android:layout_margin="10dp"
                             android:gravity="center"
-                            android:id="@+id/ch_current_pass2"
+                            android:id="@+id/ch_new_pass2"
                             style="@style/modifiedEditText"
                             android:inputType="textPassword"
                             android:maxLines="1"
@@ -135,7 +135,6 @@
             style="@style/Widget.AppCompat.Button.Borderless.Colored"
             android:layout_gravity="center"
             android:gravity="center"
-            android:background="@color/softmaroon"
             android:textColor="@color/white"
             />
         <TextView
@@ -149,6 +148,7 @@
             style="@style/Widget.AppCompat.Button.Borderless.Colored"
             android:layout_gravity="center"
             android:gravity="center"
+            android:background="@color/softmaroon"
             android:textColor="@color/white"
             />
 

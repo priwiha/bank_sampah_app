@@ -300,11 +300,27 @@ public class MasterMemberActivity extends AppCompatActivity {
                         i.putExtra("status", list.get(position).getStatus().toString());
                         startActivity(i);
                         finish();*/
-                        Intent i = new Intent(MasterMemberActivity.this, TransactionMenuActivity.class);
-                        //i.putExtra("add_or_update", "update");
-                        i.putExtra("idmember", list.get(position).getId().toString());
-                        startActivity(i);
-                        finish();
+                        Log.e("cek",list.get(position).getStatus().toString());
+                        //Toast.makeText(this,/*list.get(position).getStatus().toString()*/,Toast.LENGTH_SHORT).show();
+                        if (list.get(position).getStatus().toString().equals("T")){
+                            Intent i = new Intent(MasterMemberActivity.this, ApprovalOrUpdateMemberActivity.class);
+                            i.putExtra("add_or_update", "update1");
+                            i.putExtra("id", list.get(position).getId().toString());
+                            i.putExtra("username", list.get(position).getUsername().toString());
+                            i.putExtra("name", list.get(position).getName().toString());
+                            i.putExtra("phone", list.get(position).getPhone().toString());
+                            i.putExtra("mail", list.get(position).getMail().toString());
+                            i.putExtra("status", list.get(position).getStatus().toString());
+                            startActivity(i);
+                            finish();
+                        }
+                        else {
+                            Intent i = new Intent(MasterMemberActivity.this, TransactionMenuActivity.class);
+                            //i.putExtra("add_or_update", "update");
+                            i.putExtra("idmember", list.get(position).getId().toString());
+                            startActivity(i);
+                            finish();
+                        }
                     }
                 });
             } catch (JSONException e) {

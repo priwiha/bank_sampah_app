@@ -1,5 +1,6 @@
 package com.example.bank_sampah.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,11 +34,18 @@ public class HistoriReedemAdapter extends RecyclerView.Adapter<HistoriReedemAdap
         return new HistoriReedemAdapter.ViewHolder(item,context);//1:1 adapter:activity
     }
 
+    @SuppressLint("ResourceAsColor")
     @Override
     public void onBindViewHolder(@NonNull HistoriReedemAdapter.ViewHolder holder, int position) {
         HistoriReedemModel temp = data.get(position);
         holder.tgl.setText(temp.getTgl());
         holder.amt.setText(temp.getAmt());
+        String status = "Approve";
+        if (temp.getStatus().trim().equals("0")){
+            status = "Belum Approve";
+            holder.status.setTextColor(R.color.softmaroon);
+        }
+        holder.status.setText(status);
     }
 
     @Override
@@ -49,11 +57,14 @@ public class HistoriReedemAdapter extends RecyclerView.Adapter<HistoriReedemAdap
     public class ViewHolder extends RecyclerView.ViewHolder {
         private TextView tgl;
         private TextView amt;
+
+        private TextView status;
         public ViewHolder(@NonNull View itemView, Context context) {
             super(itemView);
 
             tgl = (TextView) itemView.findViewById(R.id.txtTgl);
             amt = (TextView) itemView.findViewById(R.id.txtRp);
+            status = (TextView) itemView.findViewById(R.id.txtfield1);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

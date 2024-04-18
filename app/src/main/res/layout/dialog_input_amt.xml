@@ -31,6 +31,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:id="@+id/title"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginTop="14dp"
                     android:gravity="center"
@@ -74,6 +75,7 @@
                         android:textColor="@color/white"
                         android:background="@color/colorAccent"
                         android:id="@+id/frmOk"/>
+
                     <androidx.appcompat.widget.AppCompatButton
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

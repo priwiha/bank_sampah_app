@@ -13,29 +13,64 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/txtIdMaster"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="4"
-            android:layout_gravity="center"
-            android:gravity="left"
-            android:textColor="@color/softmaroon"
-            android:textSize="20dp"
-            android:textStyle="bold"
-            android:text="00"/>
+            android:orientation="vertical"
+            android:layout_weight="2">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/txtIdMaster"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="left"
+                android:textColor="@color/design_default_color_secondary_variant"
+                android:textSize="20dp"
+                android:textStyle="bold"
+                android:text="00"/>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/txtfield1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="left"
+                android:textSize="20dp"
+                android:textStyle="bold"
+                android:text="field1"/>
+        </LinearLayout>
 
 
-        <TextView
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/txtNamaMaster"
-            android:layout_weight="2"
-            android:textSize="20dp"
-            android:layout_marginLeft="20dp"
-            android:layout_gravity="center"
-            android:gravity="left"
-            android:text="Nama Master"/>
+            android:orientation="vertical"
+            android:layout_marginLeft="5dp"
+            android:layout_weight="2">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/txtNamaMaster"
+                android:layout_weight="2"
+                android:textSize="20dp"
+                android:layout_gravity="center"
+                android:gravity="left"
+                android:text="Nama Master"/>
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/txtfield2"
+                android:layout_weight="2"
+                android:textSize="20dp"
+                android:layout_gravity="center"
+                android:gravity="left"
+                android:text="field2"/>
+        </LinearLayout>
     </LinearLayout>
 
 

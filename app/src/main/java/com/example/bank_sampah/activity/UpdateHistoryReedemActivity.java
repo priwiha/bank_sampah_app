@@ -29,7 +29,7 @@ public class UpdateHistoryReedemActivity extends AppCompatActivity {
 
         btn_back = (TextView) findViewById(R.id.btnBack);
         inputreedem = (EditText) findViewById(R.id.input_reedem);
-        save = (TextView) findViewById(R.id.save_reedem);
+        //save = (TextView) findViewById(R.id.save_reedem);
 
         Intent intent = getIntent();
         if (intent.hasExtra("add_or_update")) {

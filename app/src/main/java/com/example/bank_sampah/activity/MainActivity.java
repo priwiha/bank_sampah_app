@@ -1,9 +1,11 @@
 package com.example.bank_sampah.activity;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -92,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
         lg_userid = (EditText) findViewById(R.id.editTextUserid);
         lg_pass = (EditText) findViewById(R.id.editTextPassword);
         forgot_pass = (TextView) findViewById(R.id.forgot);
+        forgot_pass.setVisibility(View.GONE);
 
         //button layout login
         rg_register_btn = (Button) findViewById(R.id.RegisterButtonRg);
@@ -257,191 +260,152 @@ public class MainActivity extends AppCompatActivity {
         rg_register_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String serialCode = generateSerialCode();
-                if (rg_pass.getText().toString().trim().equals(rg_konfpass.getText().toString().trim())){
+                // Membuat dialog konfirmasi
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle("Konfirmasi");
+                builder.setMessage("Apakah Anda yakin ingin proses data?");
 
-                    ProgressDialog loading = ProgressDialog.show(mContext, null, "Harap Tunggu...", true, false);
+                // Tombol "Ya"
+                builder.setPositiveButton("Ya", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Tindakan yang akan diambil jika pengguna menekan tombol "Ya"
+                        // Misalnya, menyimpan data atau menjalankan tindakan lain
+                        String serialCode = generateSerialCode();
+                        RegisterMember(rg_userid.getText().toString(),
+                                serialCode,
+                                rg_name.getText().toString(),
+                                rg_mail.getText().toString(),
+                                rg_phone.getText().toString(),
+                                rg_konfpass.getText().toString(),"2",mContext);
+                    }
+                });
 
-                    dataService.registerRequest(rg_userid.getText().toString(),
+                // Tombol "Batal"
+                builder.setNegativeButton("Batal", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Tindakan yang akan diambil jika pengguna menekan tombol "Batal"
+                        // Misalnya, tidak melakukan apa pun atau menutup dialog
+                        dialog.cancel(); // atau dialog.dismiss();
+                    }
+                });
+
+                // Tampilkan dialog
+                AlertDialog dialog = builder.create();
+                dialog.show();
+
+
+
+
+
+    }
+
+    private void RegisterMember(String userid, String serialCode,
+                                String name,
+                                String mail,
+                                String phone, String konfpass, String role, Context mContext) {
+
+        if (rg_pass.getText().toString().trim().equals(rg_konfpass.getText().toString().trim())){
+
+            ProgressDialog loading = ProgressDialog.show(mContext, null, "Harap Tunggu...", true, false);
+
+            dataService.registerRequest(userid,
                             serialCode,
-                            rg_name.getText().toString(),
-                            rg_mail.getText().toString(),
-                            rg_phone.getText().toString(),
-                            rg_konfpass.getText().toString(),"2").
-                            enqueue(new Callback<ResponseBody>() {
-                                @Override
-                                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                                    if (response.isSuccessful()){
-                                        Log.i("debug", "onResponse: Berhasil");
-                                        //Log.i("cek ",String.valueOf(response.body()));
-                                        loading.dismiss();
-                                        try {
-                                            String ResponseString = response.body().string();
-                                            // Ambil objek data dari JSON
-                                            JSONObject jsonRESULTS = new JSONObject(ResponseString);
-                                            String MessageString = jsonRESULTS.get("message").toString();
+                            name,
+                            mail,
+                            phone,
+                            konfpass,role).
+                    enqueue(new Callback<ResponseBody>() {
+                        @Override
+                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                            if (response.isSuccessful()){
+                                Log.i("debug", "onResponse: Berhasil");
+                                //Log.i("cek ",String.valueOf(response.body()));
+                                loading.dismiss();
+                                try {
+                                    String ResponseString = response.body().string();
+                                    // Ambil objek data dari JSON
+                                    JSONObject jsonRESULTS = new JSONObject(ResponseString);
+                                    String MessageString = jsonRESULTS.get("message").toString();
 
-                                            if (jsonRESULTS.has("data")) {
-                                                Object dataObject = jsonRESULTS.get("data");
-                                                System.out.println(MessageString.toString());
+                                    if (jsonRESULTS.has("data")) {
+                                        Object dataObject = jsonRESULTS.get("data");
+                                        System.out.println(MessageString.toString());
 
-                                                JSONArray dataArray = new JSONArray();
-                                                // Periksa apakah dataObject adalah objek JSON atau array JSON
-                                                if (dataObject instanceof JSONArray) {
-                                                    dataArray = (JSONArray) dataObject;
-                                                    // Anda dapat melanjutkan pemrosesan seperti biasa jika dataObject adalah array JSON
-                                                } else if (dataObject instanceof JSONObject) {
-                                                    // Buatlah array JSON baru dan tambahkan objek JSON ke dalamnya
-                                                    dataArray.put(dataObject);
-                                                    // Anda dapat melanjutkan pemrosesan dengan array JSON yang baru saja dibuat
-                                                }
-
-                                                // Output array JSON
-                                                System.out.println(dataArray.toString());
-
-                                                Log.e("panjang json array satuan", String.valueOf(dataArray.length()));
-
-                                                if (dataArray.length() > 0) {
-                                                    getDataJson(dataArray);
-                                                    System.out.println(MessageString);
-
-                                                    lg_userid.setText("");
-                                                    lg_pass.setText("");
-                                                    rg_userid.setText("");
-                                                    rg_name.setText("");
-                                                    rg_phone.setText("");
-                                                    rg_mail.setText("");
-                                                    rg_pass.setText("");
-                                                    rg_konfpass.setText("");
-
-                                                    login_layout.setVisibility(View.VISIBLE);
-                                                    register_layout.setVisibility(View.GONE);
-                                                } else {
-                                                    System.out.println(MessageString);
-                                                }
-                                            }
-                                            Toast.makeText(mContext,MessageString,Toast.LENGTH_SHORT).show();
-
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
+                                        JSONArray dataArray = new JSONArray();
+                                        // Periksa apakah dataObject adalah objek JSON atau array JSON
+                                        if (dataObject instanceof JSONArray) {
+                                            dataArray = (JSONArray) dataObject;
+                                            // Anda dapat melanjutkan pemrosesan seperti biasa jika dataObject adalah array JSON
+                                        } else if (dataObject instanceof JSONObject) {
+                                            // Buatlah array JSON baru dan tambahkan objek JSON ke dalamnya
+                                            dataArray.put(dataObject);
+                                            // Anda dapat melanjutkan pemrosesan dengan array JSON yang baru saja dibuat
                                         }
-                                    } else {
-                                        Log.i("debug", "onResponse: Tidak Berhasil");
-                                        // Tanggapan HTTP tidak berhasil
-                                        try {
-                                            String errorBody = response.errorBody().string();
-                                            // Tangani errorBody sesuai kebutuhan
-                                            Toast.makeText(mContext,errorBody,Toast.LENGTH_SHORT).show();
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
+
+                                        // Output array JSON
+                                        System.out.println(dataArray.toString());
+
+                                        Log.e("panjang json array satuan", String.valueOf(dataArray.length()));
+
+                                        if (dataArray.length() > 0) {
+                                            getDataJson(dataArray);
+                                            System.out.println(MessageString);
+
+                                            lg_userid.setText("");
+                                            lg_pass.setText("");
+                                            rg_userid.setText("");
+                                            rg_name.setText("");
+                                            rg_phone.setText("");
+                                            rg_mail.setText("");
+                                            rg_pass.setText("");
+                                            rg_konfpass.setText("");
+
+                                            login_layout.setVisibility(View.VISIBLE);
+                                            register_layout.setVisibility(View.GONE);
+                                        } else {
+                                            System.out.println(MessageString);
                                         }
-                                        loading.dismiss();
-
-
                                     }
+                                    //Toast.makeText(mContext,MessageString,Toast.LENGTH_SHORT).show();
+
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
                                 }
-
-                                @Override
-                                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                                    Log.e("debug", "onFailure: ERROR > " + t.getMessage());
-                                    loading.dismiss();
-
-                                    Toast.makeText(mContext, t.getMessage(), Toast.LENGTH_SHORT).show();
+                            } else {
+                                Log.i("debug", "onResponse: Tidak Berhasil");
+                                // Tanggapan HTTP tidak berhasil
+                                try {
+                                    String errorBody = response.errorBody().string();
+                                    // Tangani errorBody sesuai kebutuhan
+                                    Toast.makeText(mContext,errorBody,Toast.LENGTH_SHORT).show();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
                                 }
-                            });
+                                loading.dismiss();
 
 
-                    /*dataService.registerRequest(rg_userid.getText().toString(),
-                            serialCode,
-                            rg_name.getText().toString(),
-                            rg_mail.getText().toString(),
-                            rg_phone.getText().toString(),
-                            rg_konfpass.getText().toString(),"2"*//*,"Y"*//*).
-                            enqueue(new Callback<ResponseBody>() {
-                                @Override
-                                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                                    if (response.isSuccessful()){
-                                        Log.i("debug", "onResponse: Berhasil");
-                                        //Log.i("cek ",String.valueOf(response.body()));
-                                        loading.dismiss();
-                                        try {
+                            }
+                        }
 
-                                            String responseBodyString = response.body().string();
-                                            ApiResponse apiResponse = new Gson().fromJson(responseBodyString, ApiResponse.class);
-                                            boolean success = apiResponse.isSuccess();
-                                            String message = apiResponse.getMessage();
-                                            System.out.println("Success: " + success);
-                                            System.out.println("Message: " + message);
+                        @Override
+                        public void onFailure(Call<ResponseBody> call, Throwable t) {
+                            Log.e("debug", "onFailure: ERROR > " + t.getMessage());
+                            loading.dismiss();
 
-                                            // Ambil objek data dari JSON
-                                            JSONObject jsonRESULTS = new JSONObject(responseBodyString);
-                                            // Periksa apakah kunci "data" ada di dalam objek JSON
-                                            if (jsonRESULTS.has("data")) {
-                                                JSONObject dataObject = jsonRESULTS.getJSONObject("data");
+                            Toast.makeText(mContext, t.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
 
-                                                // Buat array JSON baru dan tambahkan objek data ke dalamnya
-                                                JSONArray dataArray = new JSONArray();
-                                                dataArray.put(dataObject);
-
-                                                // Output array JSON
-                                                //System.out.println(dataArray.toString());
-
-                                                Log.e("cek panjang json array",String.valueOf(dataArray.length()));
-                                                if (dataArray.length()>0)
-                                                {
-                                                    getDataJson(dataArray);
-                                                }
-
-                                                login_layout.setVisibility(View.VISIBLE);
-                                                register_layout.setVisibility(View.GONE);
-
-                                                lg_userid.setText("");
-                                                lg_pass.setText("");
-                                                rg_userid.setText("");
-                                                rg_name.setText("");
-                                                rg_phone.setText("");
-                                                rg_mail.setText("");
-                                                rg_pass.setText("");
-                                                rg_konfpass.setText("");
-                                            }
-                                            else{
-                                                Toast.makeText(mContext,
-                                                        message,
-                                                        Toast.LENGTH_SHORT).show();
-                                            }
-
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        }
-                                    } else {
-
-                                        Toast.makeText(mContext,
-                                                "onResponse: Tidak Berhasil",
-                                                Toast.LENGTH_SHORT).show();
-                                        Log.i("debug", "onResponse: Tidak Berhasil");
-                                        loading.dismiss();
-                                    }
-                                }
-
-                                @Override
-                                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                                    Log.e("debug", "onFailure: ERROR > " + t.getMessage());
-                                    loading.dismiss();
-                                    Toast.makeText(mContext, "onFailure: ERROR > " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                                }
-                            });*/
-
-            }
-            else {
-                    Toast.makeText(mContext, "Mohon Cek Kembali Data !", Toast.LENGTH_SHORT).show();
-                    Log.e("cek code",serialCode);
-                }
-        }});
-
+        }
+        else {
+            Toast.makeText(mContext, "Mohon Cek Kembali Data !", Toast.LENGTH_SHORT).show();
+            Log.e("cek code",serialCode);
+        }
+    }});
     }
 
     // Method to generate a serial code
@@ -460,6 +424,7 @@ public class MainActivity extends AppCompatActivity {
         String userid = "";
         String role = "";
         String name = "";
+        String membercode = "";
         try{
             for (int x = 0; x < dataArray.length(); x++)
             {
@@ -469,6 +434,11 @@ public class MainActivity extends AppCompatActivity {
                 userid = child.getString("userid");
                 name = child.getString("name");
                 role = child.getString("role");
+
+                if (child.getString("role").equalsIgnoreCase("2") )
+                {
+                    membercode = child.getString("membercode");
+                }
 
                 //Toast.makeText(MainActivity.this, "Berhasil Login", Toast.LENGTH_SHORT).show();
                 login_layout.setVisibility(View.VISIBLE);
@@ -493,6 +463,11 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(i);
                 finish();
             } else if (role.equals("2")) {
+                /////////////GlobalVariables
+                globalData.addData(membercode);
+                /////////GlobalVariables
+                //Toast.makeText(this,membercode,Toast.LENGTH_SHORT).show();
+
                 //GlobalVariables(id,userid);
                 Intent i = new Intent(MainActivity.this, DashboardMemberActivity.class);
                 // Membuat objek Bundle
@@ -501,6 +476,7 @@ public class MainActivity extends AppCompatActivity {
                 bundle.putString("id", id);
                 bundle.putString("userid", userid);
                 bundle.putString("name", name);
+                bundle.putString("membercode", membercode);
                 // Menambahkan Bundle ke Intent
                 i.putExtras(bundle);
                 startActivity(i);

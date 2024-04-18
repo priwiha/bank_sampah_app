@@ -55,7 +55,7 @@ public class HistoryReedemAdminActivity extends AppCompatActivity {
     private TextView tvtelp;
     private TextView tvdate;
     private TextView btn_back;
-    private EditText search_date;
+    private EditText search;
 
 
     private RecyclerView rcv_reedem;
@@ -85,7 +85,7 @@ public class HistoryReedemAdminActivity extends AppCompatActivity {
         tvdate = (TextView) findViewById(R.id.tvdate);
         btn_back = (TextView) findViewById(R.id.btnBack);
         rcv_reedem = (RecyclerView) findViewById(R.id.rcv_reedem);
-        search_date = (EditText) findViewById(R.id.input_name);
+        search = (EditText) findViewById(R.id.input_name);
 
 
         // Inisialisasi SwipeRefreshLayout
@@ -138,6 +138,130 @@ public class HistoryReedemAdminActivity extends AppCompatActivity {
         });
 
 
+        search.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // on below line we are getting
+                // the instance of our calendar.
+                final Calendar c = Calendar.getInstance();
+
+                // on below line we are getting
+                // our day, month and year.
+                int year = c.get(Calendar.YEAR);
+                int month = c.get(Calendar.MONTH);
+                int day = c.get(Calendar.DAY_OF_MONTH);
+
+                // on below line we are creating a variable for date picker dialog.
+                DatePickerDialog datePickerDialog = new DatePickerDialog(
+                        // on below line we are passing context.
+                        mContext,
+                        new DatePickerDialog.OnDateSetListener() {
+                            @Override
+                            public void onDateSet(DatePicker view, int year,
+                                                  int monthOfYear, int dayOfMonth) {
+                                // Mengonversi bulan menjadi format dua digit.
+                                String formattedMonth = String.format("%02d", monthOfYear + 1);
+                                String formattedDay = String.format("%02d", dayOfMonth);
+
+                                search.setText(formattedDay + "/" + formattedMonth + "/" + year);
+                                String date = search.getText().toString();
+                                System.out.println("cek fill tgl: "+date);
+                                //Toast.makeText(DashboardMemberActivity.this, date, Toast.LENGTH_SHORT).show();
+
+                                ProgressDialog loading = ProgressDialog.show(mContext, null, "Harap Tunggu...", true, false);
+                                if (date.trim().isEmpty()) {
+                                    getHistoryRedeem(id_member,mContext,loading);
+                                } else {
+                                    fillRedeem(id_member, date, loading, mContext);
+                                }
+                            }
+                        },
+                        // on below line we are passing year,
+                        // month and day for selected date in our date picker.
+                        year, month, day);
+                // at last we are calling show to
+                // display our date picker dialog.
+                datePickerDialog.show();
+            }
+        });
+
+    }
+
+    private void fillRedeem(String id_member, String date, ProgressDialog loading, Context mContext) {
+        dataService.GetReedem_byMemberCode_Date(id_member,date).
+                enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        if (response.isSuccessful()) {
+                            loading.dismiss();
+                            mSwipeRefreshLayout.setRefreshing(false);
+                            try {
+                                String ResponseString = response.body().string();
+                                // Ambil objek data dari JSON
+                                JSONObject jsonRESULTS = new JSONObject(ResponseString);
+                                String MessageString = jsonRESULTS.get("message").toString();
+
+                                if (jsonRESULTS.has("data")) {
+                                    Object dataObject = jsonRESULTS.get("data");
+                                    System.out.println(MessageString.toString());
+
+                                    JSONArray dataArray = new JSONArray();
+                                    // Periksa apakah dataObject adalah objek JSON atau array JSON
+                                    if (dataObject instanceof JSONArray) {
+                                        dataArray = (JSONArray) dataObject;
+                                        // Anda dapat melanjutkan pemrosesan seperti biasa jika dataObject adalah array JSON
+                                    } else if (dataObject instanceof JSONObject) {
+                                        // Buatlah array JSON baru dan tambahkan objek JSON ke dalamnya
+                                        dataArray.put(dataObject);
+                                        // Anda dapat melanjutkan pemrosesan dengan array JSON yang baru saja dibuat
+                                    }
+
+                                    // Output array JSON
+                                    System.out.println(dataArray.toString());
+
+                                    Log.e("panjang json array satuan", String.valueOf(dataArray.length()));
+
+                                    if (dataArray.length() > 0) {
+                                        getResponListTimbangJson(dataArray);
+                                        System.out.println(MessageString);
+
+                                    } else {
+                                        System.out.println(MessageString);
+                                    }
+                                    Toast.makeText(mContext,MessageString,Toast.LENGTH_SHORT).show();
+                                }
+                                else {
+                                    getHistoryRedeem(id_member,mContext,loading);
+                                }
+
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            } catch (JSONException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                        else {
+                            loading.dismiss();
+                            mSwipeRefreshLayout.setRefreshing(false);
+                            // Tanggapan HTTP tidak berhasil
+                            try {
+                                String errorBody = response.errorBody().string();
+                                // Tangani errorBody sesuai kebutuhan
+                                Toast.makeText(mContext,errorBody,Toast.LENGTH_SHORT).show();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Log.e("debug", "onFailure: ERROR > " + t.getMessage());
+                        loading.dismiss();
+                        mSwipeRefreshLayout.setRefreshing(false);
+                        Toast.makeText(mContext,t.getMessage(),Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private void initComponents(Context mContext, String id_member) {
@@ -186,58 +310,7 @@ public class HistoryReedemAdminActivity extends AppCompatActivity {
                                         System.out.println(MessageString);
                                     }
                                 }
-                                /*String responseBodyString = response.body().string();
-                                ApiResponse apiResponse = new Gson().fromJson(responseBodyString, ApiResponse.class);
 
-                                if (apiResponse != null && apiResponse.isSuccess()) {
-                                    // Tanggapan sukses, lakukan sesuatu di sini
-                                    Log.i("debug", "onResponse: Berhasil");
-                                    //Log.i("cek ",String.valueOf(response.body()));
-                                    loading.dismiss();
-                                    try {
-                                        boolean success = apiResponse.isSuccess();
-                                        String message = apiResponse.getMessage();
-                                        System.out.println("Success: " + success);
-                                        System.out.println("Message: " + message);
-
-                                        // Ambil objek data dari JSON
-                                        JSONObject jsonRESULTS = new JSONObject(responseBodyString);
-                                        // Periksa apakah kunci "data" ada di dalam objek JSON
-                                        if (jsonRESULTS.has("data")) {
-                                            JSONObject dataObject = jsonRESULTS.getJSONObject("data");
-
-                                            // Buat array JSON baru dan tambahkan objek data ke dalamnya
-                                            JSONArray dataArray = new JSONArray();
-                                            dataArray.put(dataObject);
-
-                                            // Output array JSON
-                                            System.out.println(dataArray.toString());
-
-                                            Log.e("panjang json array satuan",String.valueOf(dataArray.length()));
-                                            if (dataArray.length()>0)
-                                            {
-                                                getResponJson(dataArray);
-                                            }
-                                        }
-                                        else{
-                                            Toast.makeText(mContext,
-                                                    message,
-                                                    Toast.LENGTH_SHORT).show();
-                                        }
-
-
-                                    } catch (JSONException e) {
-                                        throw new RuntimeException(e);
-                                    }
-                                }
-                                else {
-
-                                    loading.dismiss();
-                                    // Tanggapan API sukses, tetapi ada kesalahan aplikasi
-                                    String errorMessage = apiResponse != null ? apiResponse.getMessage() : "Unknown error";
-                                    // Tampilkan errorMessage atau lakukan tindakan lain
-                                    Toast.makeText(mContext,errorMessage,Toast.LENGTH_SHORT).show();
-                                }*/
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
                             } catch (JSONException e) {
@@ -372,6 +445,7 @@ public class HistoryReedemAdminActivity extends AppCompatActivity {
         String id = "";
         String tgl = "";
         String rupiah = "";
+        String status = "";
 
         list = new ArrayList<HistoriTransactionModel>();
         if (dataArray.length() > 0) {
@@ -381,8 +455,10 @@ public class HistoryReedemAdminActivity extends AppCompatActivity {
                 {
                     JSONObject jo2 = dataArray.getJSONObject(i);
                     id     = jo2.getString("idredeem");
-                    rupiah    = jo2.getString("redeemamt");
+                    rupiah = jo2.getString("redeemamt");
                     tgl    = jo2.getString("redeemdate");
+                    status = jo2.getString("approved");
+
 
                     // Mengonversi string menjadi double
                     double angka = Double.parseDouble(rupiah);
@@ -403,8 +479,9 @@ public class HistoryReedemAdminActivity extends AppCompatActivity {
                         // Output hasilnya
                         System.out.println("Tanggal dalam format baru: " + formattedDate);
 
-                        list.add(new HistoriTransactionModel(id,formattedDate,angkaFormatted));
-
+                        if (status=="1") {
+                            list.add(new HistoriTransactionModel(id, formattedDate, "Approved", "redeem", status, angkaFormatted));
+                        }
                     } catch (ParseException e) {
                         throw new RuntimeException(e);
                     }
@@ -437,55 +514,9 @@ public class HistoryReedemAdminActivity extends AppCompatActivity {
         });
 
 
-        // Tambahkan OnClickListener ke EditText untuk memunculkan DatePickerDialog
-        search_date.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showDatePickerDialog();
-            }
-        });
-
-        // Tambahkan TextWatcher ke EditText untuk filter saat teks berubah
-        search_date.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                // Not needed for this example
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                // Invoke the filter method when text changes
-                adapter.getFilter().filter(charSequence);
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                // Not needed for this example
-            }
-        });
     }
 
-    private void showDatePickerDialog() {
-            final Calendar currentDate = Calendar.getInstance();
-            int year = currentDate.get(Calendar.YEAR);
-            int month = currentDate.get(Calendar.MONTH);
-            int day = currentDate.get(Calendar.DAY_OF_MONTH);
 
-            DatePickerDialog datePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
-                @Override
-                public void onDateSet(DatePicker datePicker, int selectedYear, int selectedMonth, int selectedDay) {
-                    // Handle date selection and update EditText
-                    Calendar selectedDate = Calendar.getInstance();
-                    selectedDate.set(selectedYear, selectedMonth, selectedDay);
-
-                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-                    search_date.setText(sdf.format(selectedDate.getTime()));
-                }
-            }, year, month, day);
-
-            datePickerDialog.show();
-
-    }
 
     public void onBackPressed() {
         if (doubleBackToExitPressedOnce) {

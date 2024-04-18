@@ -76,7 +76,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="right"
                     android:gravity="right"
-                    android:textColor="@color/lightgreen"
+                    android:textColor="@color/design_default_color_secondary_variant"
                     android:textSize="15dp"
                     android:textStyle="bold"
                     android:text="Tanggal dd/mm/yyyy"/>

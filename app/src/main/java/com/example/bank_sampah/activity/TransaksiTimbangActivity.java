@@ -1,5 +1,6 @@
 package com.example.bank_sampah.activity;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import okhttp3.OkHttpClient;
@@ -11,6 +12,7 @@ import retrofit2.Response;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -135,7 +137,36 @@ public class TransaksiTimbangActivity extends AppCompatActivity {
         btn_save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                createTimbang(id_member,kat_id,iduom,et_bobot.getText().toString(),harga,userid,mContext);
+                // Membuat dialog konfirmasi
+                AlertDialog.Builder builder = new AlertDialog.Builder(TransaksiTimbangActivity.this);
+                builder.setTitle("Konfirmasi");
+                builder.setMessage("Apakah Anda yakin ingin proses data?");
+
+                // Tombol "Ya"
+                builder.setPositiveButton("Ya", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Tindakan yang akan diambil jika pengguna menekan tombol "Ya"
+                        // Misalnya, menyimpan data atau menjalankan tindakan lain
+
+
+                        createTimbang(id_member,kat_id,iduom,et_bobot.getText().toString(),harga,userid,mContext);
+                    }
+                });
+
+                // Tombol "Batal"
+                builder.setNegativeButton("Batal", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Tindakan yang akan diambil jika pengguna menekan tombol "Batal"
+                        // Misalnya, tidak melakukan apa pun atau menutup dialog
+                        dialog.cancel(); // atau dialog.dismiss();
+                    }
+                });
+
+                // Tampilkan dialog
+                AlertDialog dialog = builder.create();
+                dialog.show();
             }
         });
 

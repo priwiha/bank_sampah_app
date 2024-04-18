@@ -78,6 +78,7 @@ public class MasterKategoriActivity extends AppCompatActivity {
         btn_add = (TextView) findViewById(R.id.btnAddCat);
         btn_back = (TextView) findViewById(R.id.btnBack);
         search_name = (EditText) findViewById(R.id.input_name);
+        search_name.setVisibility(View.GONE);
 
 
         // Inisialisasi SwipeRefreshLayout
@@ -246,20 +247,20 @@ public class MasterKategoriActivity extends AppCompatActivity {
                     nama = jo2.getString("namecategory");
                     satuan = jo2.getString("iduom");
                     satuan_nama = jo2.getString("uomname");
-                    list.add(new MasterDataModel(id,nama,satuan,satuan_nama));
+                    list.add(new MasterDataModel(id,nama,satuan,satuan_nama,"kategori"));
                 }
                 adapter = new MasterDataAdapter(list,this);//array dimasukkan ke adapter
                 rcv_master.setAdapter(adapter);
                 rcv_master.setLayoutManager(new LinearLayoutManager(this));
 
-                String finalNama = nama;
+                //String finalNama = nama;
                 adapter.setOnItemClickListener(new MasterDataAdapter.OnItemClickListener() {
                     @Override
                     public void onItemClick(View itemView, int position) {
-                        Toast.makeText(MasterKategoriActivity.this,list.get(position).getName().toString(),Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(MasterKategoriActivity.this,list.get(position).getName().toString(),Toast.LENGTH_SHORT).show();
                         Intent i = new Intent(MasterKategoriActivity.this, CreateOrUpdateCategoryActivity.class);
                         i.putExtra("add_or_update", "update");
-                        i.putExtra("name", finalNama);
+                        i.putExtra("name", list.get(position).getName());
                         i.putExtra("satuan", list.get(position).getSatuan().toString());
                         i.putExtra("id", list.get(position).getId().toString());
                         startActivity(i);

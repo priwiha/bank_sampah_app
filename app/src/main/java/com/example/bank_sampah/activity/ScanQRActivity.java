@@ -40,7 +40,7 @@ public class ScanQRActivity extends AppCompatActivity implements SurfaceHolder.C
     @Override
     public void surfaceCreated(@NonNull SurfaceHolder holder) {
         // Set up the camera in another method to handle permissions
-        setUpCamera();
+        //setUpCamera();
     }
 
     @Override
@@ -53,7 +53,7 @@ public class ScanQRActivity extends AppCompatActivity implements SurfaceHolder.C
 
     }
 
-    private void setUpCamera() {
+    /*private void setUpCamera() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             // Permission granted, start camera
             try {
@@ -65,5 +65,5 @@ public class ScanQRActivity extends AppCompatActivity implements SurfaceHolder.C
             // Permission not granted, request it
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, QRScannerActivity2.REQUEST_CAMERA_PERMISSION);
         }
-    }
+    }*/
 }

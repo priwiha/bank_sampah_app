@@ -42,7 +42,7 @@ public class MemberDataAdapter extends RecyclerView.Adapter<MemberDataAdapter.Vi
     @Override
     public void onBindViewHolder(@NonNull MemberDataAdapter.ViewHolder holder, int position) {
         MemberDataModel temp = data.get(position);
-        holder.id.setText(temp.getId());
+        holder.id.setText("Code :"+temp.getId());
         String status="";
         if (temp.getStatus().equalsIgnoreCase("Y")) {
             status = "Aktif";
@@ -50,7 +50,10 @@ public class MemberDataAdapter extends RecyclerView.Adapter<MemberDataAdapter.Vi
         else {
             status = "Non-Aktif";
         }
-        holder.nama.setText(temp.getName()+" ("+status+")");
+        holder.nama.setText(temp.getName());
+
+        holder.field1.setText("Userid :"+temp.getUsername());
+        holder.field2.setText(status);
     }
 
     @Override
@@ -95,12 +98,16 @@ public class MemberDataAdapter extends RecyclerView.Adapter<MemberDataAdapter.Vi
     public class ViewHolder extends RecyclerView.ViewHolder {
         private TextView id;
         private TextView nama;
+        private TextView field1;
+        private TextView field2;
 
         public ViewHolder(@NonNull View itemView, Context context) {
             super(itemView);
 
             id = (TextView) itemView.findViewById(R.id.txtIdMaster);
             nama = (TextView) itemView.findViewById(R.id.txtNamaMaster);
+            field1 = (TextView) itemView.findViewById(R.id.txtfield1);
+            field2 = (TextView) itemView.findViewById(R.id.txtfield2);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

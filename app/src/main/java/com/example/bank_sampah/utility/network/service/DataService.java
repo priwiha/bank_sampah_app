@@ -34,7 +34,29 @@ public interface DataService extends Parcelable {
     @POST("user/login")
     Call<ResponseBody> LoginRequest(@Field("userid") String userid,
                                     @Field("password") String pass);
+
+    @FormUrlEncoded
+    @POST("user/chpass")
+    Call<ResponseBody> ChangePass(@Field("userid") String userid,
+                                    @Field("pass_old") String old_pass,
+                                  @Field("pass_new") String new_pass);
+
+    @FormUrlEncoded
+    @POST("user/reset_pass")
+    Call<ResponseBody> ResetPass(@Field("password") String password,
+                                  @Field("userid") String userid);
     ////////////CRUD PROCESS USER
+
+    ///////////CRUD PROSES MEMBER
+    @FormUrlEncoded
+    @POST("member/updatemember")
+    Call<ResponseBody> UpdateMember(@Field("userid") String userid,
+                                    @Field("name") String pass,
+                                    @Field("aktif") String aktif,
+                                    @Field("notelp") String notelp,
+                                    @Field("mail") String mail,
+                                    @Field("chuserid") String chuserid);
+    ///////////
 
     ////////////CRUD PROCESS UOM
     @FormUrlEncoded
@@ -70,6 +92,12 @@ public interface DataService extends Parcelable {
 
     @GET("price/index")
     Call<ResponseBody> PricelistRequestAll();
+
+    @FormUrlEncoded
+    @POST("price/get_price_date")
+    Call<ResponseBody> GetPrice_Date(@Field("date") String date);
+
+
     ////////////CRUD PROCESS PRICE
 
 
@@ -88,6 +116,12 @@ public interface DataService extends Parcelable {
                                     @Field("mail") String mail,
                                     @Field("chuserid") String chuserid,
                                     @Field("aktif") String aktif);
+
+    @FormUrlEncoded
+    @POST("member/chstatus_member")
+    Call<ResponseBody> MemberActivate(@Field("membercode") String id,
+                                    @Field("chuserid") String chuserid);
+
     ////////////CRUD PROCESS PRICE
 
 
@@ -108,6 +142,10 @@ public interface DataService extends Parcelable {
     @FormUrlEncoded
     @POST("transaksi/timbang_list")
     Call<ResponseBody> GetTimbang_byMemberCode(@Field("membercode") String membercode);
+    @FormUrlEncoded
+    @POST("transaksi/timbang_list_date")
+    Call<ResponseBody> GetTimbang_byMemberCode_Date(@Field("membercode") String membercode,
+                                                    @Field("date") String date);
 
 
     //////REDEEM
@@ -117,8 +155,38 @@ public interface DataService extends Parcelable {
                                      @Field("redeemamt") String redeemamt,
                                      @Field("inuserid") String inuserid);
 
+
     @FormUrlEncoded
-    @POST("transaksi/redeem_list")
+    @POST("transaksi/redeem_mem")
+    Call<ResponseBody> CreateRedeemMember(@Field("membercode") String membercode,
+                                    @Field("redeemamt") String redeemamt,
+                                    @Field("inuserid") String inuserid);
+
+
+    @FormUrlEncoded
+    @POST("redeem/approve_redeem")
+    Call<ResponseBody> ApproveRedeem(@Field("idredeem") String idredeem,
+                                           @Field("membercode") String membercode,
+                                          @Field("chuserid") String chuserid);
+
+
+    @FormUrlEncoded
+    @POST("redeem/redeem_list")
     Call<ResponseBody> GetReedem_byMemberCode(@Field("membercode") String membercode);
+
+    @FormUrlEncoded
+    @POST("redeem/redeem_list_date")
+    Call<ResponseBody> GetReedem_byMemberCode_Date(@Field("membercode") String membercode,
+                                                    @Field("date") String date);
     ///////////TRANSAKSI
+
+    ///REDEEM
+    @FormUrlEncoded
+    @POST("redeem/redeem_wait_list")
+    Call<ResponseBody> GetWaitReedem_byMemberCode(@Field("membercode") String membercode);
+
+    @FormUrlEncoded
+    @POST("redeem/redeem_wait_list_date")
+    Call<ResponseBody> GetWaitReedem_byMemberCode_Date(@Field("membercode") String membercode,
+                                                   @Field("date") String date);
 }

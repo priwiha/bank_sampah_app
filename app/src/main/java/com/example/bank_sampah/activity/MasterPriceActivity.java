@@ -60,7 +60,7 @@ public class MasterPriceActivity extends AppCompatActivity {
 
     private TextView btn_add;
     private TextView btn_back;
-    private EditText search_date;
+    private EditText search;
 
     /////retrofit2
     private DataService dataService;
@@ -83,7 +83,7 @@ public class MasterPriceActivity extends AppCompatActivity {
         rcv_master = (RecyclerView) findViewById(R.id.rcv_datamaster);
         btn_add = (TextView) findViewById(R.id.btnAddCat);
         btn_back = (TextView) findViewById(R.id.btnBack);
-        search_date = (EditText) findViewById(R.id.input_name);
+        search = (EditText) findViewById(R.id.input_name);
 
         // Inisialisasi SwipeRefreshLayout
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
@@ -98,9 +98,6 @@ public class MasterPriceActivity extends AppCompatActivity {
         Context mContext = MasterPriceActivity.this;
         dataService = UtilsApi.getAPIService();
         /////retrofit2
-
-
-
 
 
         initComponents(mContext);
@@ -139,9 +136,138 @@ public class MasterPriceActivity extends AppCompatActivity {
         });
 
 
+        search.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // on below line we are getting
+                // the instance of our calendar.
+                final Calendar c = Calendar.getInstance();
+
+                // on below line we are getting
+                // our day, month and year.
+                int year = c.get(Calendar.YEAR);
+                int month = c.get(Calendar.MONTH);
+                int day = c.get(Calendar.DAY_OF_MONTH);
+
+                // on below line we are creating a variable for date picker dialog.
+                DatePickerDialog datePickerDialog = new DatePickerDialog(
+                        // on below line we are passing context.
+                        MasterPriceActivity.this,
+                        new DatePickerDialog.OnDateSetListener() {
+                            @Override
+                            public void onDateSet(DatePicker view, int year,
+                                                  int monthOfYear, int dayOfMonth) {
+                                // Mengonversi bulan menjadi format dua digit.
+                                String formattedMonth = String.format("%02d", monthOfYear + 1);
+                                String formattedDay = String.format("%02d", dayOfMonth);
+
+                                search.setText(formattedDay + "/" + formattedMonth + "/" + year);
+                                String date = search.getText().toString();
+                                System.out.println("cek fill tgl: "+date);
+                                //Toast.makeText(HistoryReedemActivity.this, date, Toast.LENGTH_SHORT).show();
+
+                                if (date.trim().isEmpty()) {
+                                    initComponents(mContext);
+                                } else {
+                                    fillPrice(date, mContext);
+                                }
+                            }
+                        },
+                        // on below line we are passing year,
+                        // month and day for selected date in our date picker.
+                        year, month, day);
+                // at last we are calling show to
+                // display our date picker dialog.
+                datePickerDialog.show();
+            }
+        });
 
 
+    }
 
+    private void fillPrice(String date, Context mContext) {
+        mSwipeRefreshLayout.setRefreshing(true);
+
+        ProgressDialog loading = ProgressDialog.show(mContext, null, "Harap Tunggu...", true, false);
+
+        //Toast.makeText(mContext, rg_mail.getText().toString(), Toast.LENGTH_SHORT).show();
+
+        dataService.GetPrice_Date(date).
+                enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        if (response.isSuccessful()){
+                            Log.i("debug", "onResponse: Berhasil");
+                            //Log.i("cek ",String.valueOf(response.body()));
+                            loading.dismiss();
+                            mSwipeRefreshLayout.setRefreshing(false);
+                            try {
+                                String ResponseString = response.body().string();
+                                // Ambil objek data dari JSON
+                                JSONObject jsonRESULTS = new JSONObject(ResponseString);
+                                //JSONObject dataObject = jsonRESULTS.getJSONObject("data");
+                                String MessageString = jsonRESULTS.get("message").toString();
+
+                                if (jsonRESULTS.has("data")) {
+
+                                    Object dataObject = jsonRESULTS.get("data");
+                                    System.out.println(dataObject);
+
+                                    JSONArray dataArray = new JSONArray();
+                                    // Periksa apakah dataObject adalah objek JSON atau array JSON
+                                    if (dataObject instanceof JSONArray) {
+                                        dataArray = (JSONArray) dataObject;
+                                        // Anda dapat melanjutkan pemrosesan seperti biasa jika dataObject adalah array JSON
+                                    } else if (dataObject instanceof JSONObject) {
+                                        // Buatlah array JSON baru dan tambahkan objek JSON ke dalamnya
+                                        dataArray.put(dataObject);
+                                        // Anda dapat melanjutkan pemrosesan dengan array JSON yang baru saja dibuat
+                                    }
+
+                                    // Output array JSON
+                                    System.out.println(dataArray.toString());
+
+                                    Log.e("panjang json array satuan", String.valueOf(dataArray.length()));
+
+                                    if (dataArray.length() > 0) {
+                                        getDataJson(dataArray);
+                                        System.out.println(MessageString);
+
+                                    } else {
+                                        System.out.println(MessageString);
+                                    }
+                                    Toast.makeText(mContext, MessageString, Toast.LENGTH_SHORT).show();
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            Log.i("debug", "onResponse: Tidak Berhasil");
+                            // Tanggapan HTTP tidak berhasil
+                            try {
+                                String errorBody = response.errorBody().string();
+                                // Tangani errorBody sesuai kebutuhan
+                                Toast.makeText(mContext,errorBody,Toast.LENGTH_SHORT).show();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            loading.dismiss();
+                            mSwipeRefreshLayout.setRefreshing(false);
+
+
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Log.e("debug", "onFailure: ERROR > " + t.getMessage());
+                        loading.dismiss();
+                        mSwipeRefreshLayout.setRefreshing(false);
+                        Toast.makeText(mContext, t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private void initComponents(Context mContext) {
@@ -269,6 +395,7 @@ public class MasterPriceActivity extends AppCompatActivity {
                 }
 
                 adapter = new PriceAdapter(list,this);//array dimasukkan ke adapter
+                adapter.notifyDataSetChanged();
                 rcv_master.setAdapter(adapter);
                 rcv_master.setLayoutManager(new LinearLayoutManager(this));
 
@@ -301,60 +428,9 @@ public class MasterPriceActivity extends AppCompatActivity {
             }
         }
 
-        // Tambahkan OnClickListener ke EditText untuk memunculkan DatePickerDialog
-        search_date.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showDatePickerDialog();
-            }
-        });
-
-        // Tambahkan TextWatcher ke EditText untuk filter saat teks berubah
-        search_date.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                // Not needed for this example
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                // Invoke the filter method when text changes
-                adapter.getFilter().filter(charSequence);
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                // Not needed for this example
-            }
-        });
 
     }
 
-    private void showDatePickerDialog() {
-        final Calendar currentDate = Calendar.getInstance();
-        int year = currentDate.get(Calendar.YEAR);
-        int month = currentDate.get(Calendar.MONTH);
-        int day = currentDate.get(Calendar.DAY_OF_MONTH);
-
-        DatePickerDialog datePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
-            @Override
-            public void onDateSet(DatePicker datePicker, int selectedYear, int selectedMonth, int selectedDay) {
-                // Handle date selection and update EditText
-                Calendar selectedDate = Calendar.getInstance();
-                selectedDate.set(selectedYear, selectedMonth, selectedDay);
-
-                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-                search_date.setText(sdf.format(selectedDate.getTime()));
-            }
-        }, year, month, day);
-
-        datePickerDialog.show();
-    }
-
-    // Metode ini mengembalikan daftar data Anda (dummy data atau dari sumber data lainnya)
-    /*private List<MasterPriceModel> getYourDataList() {
-        // Implementasikan sesuai dengan kebutuhan Anda
-    }*/
 
     public void onBackPressed() {
         if (doubleBackToExitPressedOnce) {

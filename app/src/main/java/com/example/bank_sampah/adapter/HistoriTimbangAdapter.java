@@ -44,7 +44,9 @@ public class HistoriTimbangAdapter extends RecyclerView.Adapter<HistoriTimbangAd
     public void onBindViewHolder(@NonNull HistoriTimbangAdapter.ViewHolder holder, int position) {
         HistoriTransactionModel temp = data.get(position);
         holder.tgl.setText(temp.getTgl());
-        holder.amt.setText(temp.getKet());
+        holder.amt.setText(temp.getKet1());
+        holder.field1.setText(temp.getName());
+        holder.field2.setText(temp.getKet());
     }
 
     @Override
@@ -73,20 +75,7 @@ public class HistoriTimbangAdapter extends RecyclerView.Adapter<HistoriTimbangAd
                 } else {
                     List<HistoriTransactionModel> filteredList = new ArrayList<>();
                     for (HistoriTransactionModel item : data) {
-                        String formattedDate = null;
-                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-                            String dateString=item.getTgl();
-                            // Konversi string menjadi objek LocalDate
-                            LocalDate date = LocalDate.parse(dateString, dateFormatter);
-
-                            // Format LocalDate menjadi string dengan pola yang diinginkan
-                            formattedDate = date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-
-                        }
-
-                        if (formattedDate.contains(filterPattern)) {
-
+                        if (item.getKet().toLowerCase().contains(filterPattern)) {
                             filteredList.add(item);
                         }
                     }
@@ -108,12 +97,16 @@ public class HistoriTimbangAdapter extends RecyclerView.Adapter<HistoriTimbangAd
     public class ViewHolder extends RecyclerView.ViewHolder {
         private TextView tgl;
         private TextView amt;
+        private TextView field1;
+        private TextView field2;
 
         public ViewHolder(@NonNull View itemView, Context context) {
             super(itemView);
 
             tgl = (TextView) itemView.findViewById(R.id.txtTgl);
             amt = (TextView) itemView.findViewById(R.id.txtRp);
+            field1 = (TextView) itemView.findViewById(R.id.txtfield1);
+            field2 = (TextView) itemView.findViewById(R.id.txtfield2);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
